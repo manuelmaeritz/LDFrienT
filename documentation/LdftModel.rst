@@ -88,7 +88,9 @@ _size : `None`
 Methodes
 --------
 ``__init__(self, size, mu_fix, mu=None, dens=None, v_ext=None, r=None, r_hist=None, err_hist=None, it_hist=None, bound_cond='periodic')``
+
 **Parameters**
+
 size : `Tuple`
     It defines the amount of lattice sites for each dimension.
 mu : `List`, optional: default = `None`
@@ -153,21 +155,21 @@ bound_cond : `String`; Optional: default value 'periodic'
 ----
 
 ``cal_F(self)``
+
 Calculates the free energy of the models curent density
 profile (meaning every species treated canonical, as if
 ``_mu_fix`` is ``False`` for every species)
 
 **Returns**
-
 The free energy : `Float`
 
 ----
 
 ``cal_Om(self)``
+
 Calculates the grand potential of the models curent density
 profile (meaning every species treated grand canonicaly, as if
 ``_mu_fix`` is ``True`` for every species).
 
 **Returns**
-
 The grand potential : `Float`
