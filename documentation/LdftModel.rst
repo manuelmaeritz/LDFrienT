@@ -161,6 +161,7 @@ profile (meaning every species treated canonical, as if
 ``_mu_fix`` is ``False`` for every species)
 
 **Returns**
+
 The free energy : `Float`
 
 ----
@@ -172,4 +173,5 @@ profile (meaning every species treated grand canonicaly, as if
 ``_mu_fix`` is ``True`` for every species).
 
 **Returns**
+
 The grand potential : `Float`
