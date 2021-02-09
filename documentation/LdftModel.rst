@@ -81,13 +81,124 @@ bound_cond : `String`; Optional: default value 'periodic'
     
 Attributes
 ----------
-_size : `None`
+_size : `Tuple`
     Here the ``size``-parameter is stored. See it's description for
-    further detail. (`Tuple`)
-    
+    further detail.
+
+_mu :  `List`
+    Here the ``mu``-parameter is stored if not `None`. If `None`, a
+    list of `None` of the same length as the ``mu_fix``-parameter is
+    assigned. This attribute is being updated after every picard update.
+    See the description of the function `_make_picard_update` and the
+    parameter ``mu`` for further detail.
+
+_dens : `List`
+    Here the ``dens``-parameter is stored if not `None`. If `None`, a
+    list of `None` of the same length as the ``mu_fix``-parameter is
+    assigned. This attribute is being updated after every picard update.
+    See the description of the function `_make_picard_update` and the
+    parameter ``dens`` for further detail.
+
+_mu_fix : `List`
+    Here ``mu_fix``-argument is stored. See it's description for
+    further detail.
+
+_v_ext : `List`
+    Here ``v_ext``-parameter is stored, if not `None`. If `None`,
+    then a list of the same length as the ``mu_fix``-parameter is
+    assigned. The entries of which are zero-arrays of the shape of the
+    ``size``-parameter. See the description of the parameter ``v_ext``
+    for further details.
+
+_r : `List`
+    Here the ``r``-parameter is stored if not `None`. If `None`, then
+    the last entry of the parameter ``r_hist`` is taken, when
+    ``r_hist``!=`None`. If both parameters are `None` then
+    ``_r``=`None`. This argument gets updated after every picard-update
+    (see description of ``_make_picard_update``). For more details see
+    description of the parameter `r`.
+
+_r_hist : `List`
+    Here the ``r_hist``-parameter is stored if not `None`. Otherwise
+    an empty list is assigned. This argument gets updated after certain
+    picard-steps (see description of ``make_picard_iteration``). For
+    more detail see the description of the parameter ``r_hist``.
+
+_err_hist : `List`
+    Here the ``err_hist``-parameter is stored if not `None`. If
+    `None`, then an empty list is assigned. This argument gets updated
+    after certain picard-steps (see description of
+    ``make_picard_iteration``). For more detail see the description of
+    the parameter ``err_hist``.
+
+_it_hist : `List`
+    Here the ``it_hist``-parameter is stored if not `None`. If
+    `None`, then an empty list is assigned. This argument gets updated
+    after certain picard-steps (see description of
+    ``make_picard_iteration``). For more detail see the description of
+    the parameter ``it_hist``.
+
+_bound_cond : `String`
+    Here the ``bound_condition``-parameter is stored. See its
+    description for further information.
+
+_it_counter : `integer`
+    Counts the number of picard-updates the system has gone through.
+    If the parameter ``it_hist`` is set, its last entry is taken as its
+    initial value. Otherwise it is initialised with `0`.  It is updated
+    after every picard-update (see description of
+    ``_make_picard_update``). Every time the ``set_r`` function is
+    called, ``_it_counter`` is being reset to `0`.
+
+_dim : `integer`
+    Dimension of the system. Evaluates the length of the
+    ``size``-parameter.
+
+Properties
+----------
+
+size : `Tuple`, read-only
+    Accesses the ``_size``-attribute 
+
+mu : `List`, read and write
+    Accesses the ``_mu``-attribute
+
+dens : `List`, read and write
+    Accesses the ``_dens``-attribute
+
+mu_fix : `List`, read and write
+    Accesses the ``_mu_fix``-attribute
+
+v_ext : `List`, read and write
+    Accesses the ``_v_ext``-attribute
+
+r : `List`, read and write
+    Read accesses the ``_r``-attribute
+    The setter method calls the function ``set_r``
+
+r_hist : `List`, read-only
+    Accesses the ``_r_hist``-attribute 
+
+err_hist : `string`, read-only
+    Accesses the ``_err_hist``-attribute
+
+it_hist : `List`, read-only
+    Accesses the ``_it_hist``-attribute
+
+bound_cond : `string`, read-only
+    Accesses the ``_boundary_cond``-attribute
+
+it_counter : `int`, read-only
+    Accesses the ``_it_counter``-attribute
+
+dim : `int`, read-only
+    Accesses the ``_dim``-attribute
+
 Methodes
 --------
+
 ``__init__(self, size, mu_fix, mu=None, dens=None, v_ext=None, r=None, r_hist=None, err_hist=None, it_hist=None, bound_cond='periodic')``
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 **Parameters**
 
@@ -152,9 +263,13 @@ bound_cond : `String`; Optional: default value 'periodic'
     model. The variable can be easily extended to further accepted
     values by adapting the ``self._boundary_roll``-method.
 
-----
 
-``cal_F(self)``
+``__str__(self)``
+'''''''''''''''''
+
+
+*abstractmethod* ``cal_F(self)``
+''''''''''''''''''''''''''''''''
 
 Calculates the free energy of the models curent density
 profile (meaning every species treated canonical, as if
@@ -164,9 +279,9 @@ profile (meaning every species treated canonical, as if
 
 The free energy : `Float`
 
-----
 
 ``cal_Om(self)``
+''''''''''''''''
 
 Calculates the grand potential of the models curent density
 profile (meaning every species treated grand canonicaly, as if
@@ -175,3 +290,13 @@ profile (meaning every species treated grand canonicaly, as if
 **Returns**
 
 The grand potential : `Float`
+
+``cal_semi_Om(self)``
+'''''''''''''''''''''
+Calculates the semi grand potential of the models current
+density profile (meaning every species with ``_mu_fix==True``
+is treated grand canonically and every other canonical).
+
+**Returns**
+
+The semi-grand potential : `Float`

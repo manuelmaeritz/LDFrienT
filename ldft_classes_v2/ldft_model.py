@@ -9,13 +9,13 @@ class LdftModel(abc.ABC):
     """LdftModel is an abstract base class for lattice density functional
     theory (ldft) models. It provides an interface for every ldft model.
     This means functions specific to a certain model are predefined and
-    must be implemented in a class inheritating "LdftModel". Functions
+    must be implemented in a class inheriting "LdftModel". Functions
     applicable to any model (eg. picard updates) are completely
     implemented. This safes a lot of work and redundancy.
-    Further it suports a structure to administer a lattice system
+    Further it supports a structure to administer a lattice system
     through various instance variables and functions. If you want to
-    define your one model, just creat a class inheritating "LdftModel"
-    and override the abstract methodes.
+    define your one model, just create a class inheriting "LdftModel"
+    and overwrite the abstract methods.
     
     Parameters
     ----------
@@ -28,12 +28,12 @@ class LdftModel(abc.ABC):
         ``mu_fix``. Choose `None` if you do not want to set any entry.
     dens : `List`; Optional: default = `None`
         Contains the systems average density for every species. Supports
-        also `None` as eintry (eg. [None, 0.4, 0.4]), if just the
+        also `None` as entry (eg. [None, 0.4, 0.4]), if just the
         density of a certain species should be given. See also
         ``mu_fix``. Choose `None` if you do not want to set any entry.
     mu_fix : `List`
         Contains a boolean value for each species deciding whether the
-        chemical potential should be kept fixt during picard iteration
+        chemical potential should be kept fixed during picard iteration
         or not. `True` value treads the corresponding species as
         grand-canonical, `False`-species are treated canonical. The
         ``True``-values require a number value in the corresponding
@@ -57,29 +57,29 @@ class LdftModel(abc.ABC):
     err_hist : `List`;  Optional: default = `None`
         Contains the error at the picard-steps corresponding to the
         entries of `r_hist`. The entries are lists containing an error
-        for every species. Use `None` if no history availabe.
+        for every species. Use `None` if no history available.
     it_hist : `List`; Optional: default = `None`
-        List of the picardsteps corresponding to the density profiles at
-        the ``r_hist``-parameter. Use `None` if no history availabe.
+        List of the picard steps corresponding to the density profiles at
+        the ``r_hist``-parameter. Use `None` if no history available.
         Note: if ``r_hist`` is given then also this argument should be
         assigned with an appropriate list.
     bound_cond : `String`; Optional: default value 'periodic'
         Determines the boundary condition (bc). Values available:
         'periodic' for periodic bc, '11_if' for 2d systems with 45°
         tilted bc (to create 45° slab interfaces (11-interfaces)),
-        '110_if' for 3d sytems with a 45° tilted bc with respect to one
+        '110_if' for 3d systems with a 45° tilted bc with respect to one
         axis (for 110-interfaces), '111_if' for 3d systems with a 45°
         tilted bc with respect to two axis (for 111-interfaces). For
         '11_if', '110_if' and '111_if' the ``size``-argument should be
-        choosen in that way, the first two axis are of equal length and
+        chosen in that way, the first two axis are of equal length and
         one and the last one is of twice that length (cuboid with square
         front face and long edge twice the short edges). If one wants to
         make use of the ``bound_cond``-argument one needs to use the
-        ``_boundary_roll``-methode for rolling the density profile
-        instead of numpy.roll in the class implementing the spesific
+        ``_boundary_roll``-method for rolling the density profile
+        instead of numpy.roll in the class implementing the specific
         model. The variable can be easily extended to further accepted
         values by adapting the ``self._boundary_roll``-method.
-   """ 
+   """
 
     _size = None
     """Here the ``size``-parameter is stored. See it's description for
@@ -89,7 +89,7 @@ class LdftModel(abc.ABC):
     _mu = None
     """Here the ``mu``-parameter is stored if not `None`. If `None`, a
     list of `None` of the same length as the ``mu_fix``-parameter is
-    assigned. This atribute is being updated after every picard update.
+    assigned. This attribute is being updated after every picard update.
     See the description of the function `_make_picard_update` and the
     parameter ``mu`` for further detail. (`List`)
     """
@@ -97,7 +97,7 @@ class LdftModel(abc.ABC):
     _dens = None
     """Here the ``dens``-parameter is stored if not `None`. If `None`, a
     list of `None` of the same length as the ``mu_fix``-parameter is
-    assigned. This atribute is being updated after every picard update.
+    assigned. This attribute is being updated after every picard update.
     See the description of the function `_make_picard_update` and the
     parameter ``dens`` for further detail. (`List`)
     """
@@ -121,7 +121,7 @@ class LdftModel(abc.ABC):
     ``r_hist``!=`None`. If both parameters are `None` then
     ``_r``=`None`. This argument gets updated after every picard-update
     (see description of ``_make_picard_update``). For more details see
-    description of the paramter `r`. (`List`)
+    description of the parameter `r`. (`List`)
     """
 
     _r_hist = None
@@ -149,16 +149,16 @@ class LdftModel(abc.ABC):
 
     _bound_cond = None
     """Here the ``bound_condition``-parameter is stored. See its
-    description for further infromation. (`String`)
+    description for further information. (`String`)
     """
 
     _it_counter = None
     """Counts the number of picard-updates the system has gone through.
-    If the parameter ``it_hist`` ist set, its last entry is taken as its
+    If the parameter ``it_hist`` is set, its last entry is taken as its
     initial value. Otherwise it is initialised with `0`.  It is updated
-    after ervery picard-update (see description of
+    after every picard-update (see description of
     ``_make_picard_update``). Every time the ``set_r`` function is
-    called, ``_it_counter`` is being resetet to `0`.
+    called, ``_it_counter`` is being reset to `0`.
     """
 
     _dim = None
@@ -190,13 +190,13 @@ class LdftModel(abc.ABC):
     
     def __str__(self):
         descrStr = 'This is a LdftModel with the following properties:'
-        Str0 ='{0:<40s}: {1}\n'.format('Systemsize', self._size)
+        Str0 ='{0:<40s}: {1}\n'.format('System size', self._size)
         Str1 ='{0:<40s}: {1}\n'.format('mu_fix', self._mu_fix)
         Str2 ='{0:<40s}: {1}\n'.format('Chem. pot. \'mu\'', self._mu)
         Str3 ='{0:<40s}: {1}\n'.format('Density', self._dens)
         Str4 ='{0:<40s}: {1}\n'.format('External potential \'V_ext\'',\
                 'on' if np.any(self._v_ext) else 'off')
-        Str5 ='{0:<40s}: {1}\n'.format('Curent dens prof',type(self._r))
+        Str5 ='{0:<40s}: {1}\n'.format('Current dens prof',type(self._r))
         Str6 ='{0:<40s}: len={1}\n'.format('History',len(self._it_hist))
         Str7 ='{0:<40s}: last entry={1}\n'.format('',\
                 self._it_hist[-1] if len(self._it_hist)>0 else '---')
@@ -211,7 +211,7 @@ class LdftModel(abc.ABC):
 
     ####################################################################
     #It follows public properties for access of instance variables to
-    #the enduser. Some of them are read only.
+    #the end-user. Some of them are read only.
     ####################################################################
 
     @property
@@ -263,7 +263,7 @@ class LdftModel(abc.ABC):
     @property
     def r(self):
         """See description of ``_r`` (`List`)
-        The setter methode calls the function ``set_r``
+        The setter method calls the function ``set_r``
         """
         return self._r
 
@@ -313,7 +313,7 @@ class LdftModel(abc.ABC):
 
     @abc.abstractmethod
     def cal_F(self):
-        """Calculates the free energy of the models curent density
+        """Calculates the free energy of the models current density
         profile (meaning every species treated canonical, as if
         ``_mu_fix`` is ``False`` for every species)
 
@@ -324,8 +324,8 @@ class LdftModel(abc.ABC):
         pass
 
     def cal_Om(self):
-        """Calculates the grand potential of the models curent density
-        profile (meaning every species treated grand canonicaly, as if
+        """Calculates the grand potential of the models current density
+        profile (meaning every species treated grand canonical, as if
         ``_mu_fix`` is ``True`` for every species).
 
         Returns
@@ -338,9 +338,9 @@ class LdftModel(abc.ABC):
         return Om
 
     def cal_semi_Om(self):
-        """Calculates the semi grand potential of the models curent
+        """Calculates the semi grand potential of the models current
         density profile (meaning every species with ``_mu_fix==True``
-        is treated grand canonicaly and every other canonical).
+        is treated grand canonically and every other canonical).
 
         Returns
         -------
@@ -354,7 +354,7 @@ class LdftModel(abc.ABC):
 
     @abc.abstractmethod
     def cal_mu_ex(self):
-        """Calculates the exess chemical potential of the models curent
+        """Calculates the excess chemical potential of the models current
         density profile
 
         Returns
@@ -379,7 +379,7 @@ class LdftModel(abc.ABC):
         Parameters
         ----------
         array : `numpy.array`
-            A 3d array wich should be rolled.
+            A 3d array which should be rolled.
         steps : `int`
             Number of steps of the rolling. Negative numbers for rolling
             in negative direction.
@@ -434,7 +434,7 @@ class LdftModel(abc.ABC):
         Parameters
         ----------
         array : `numpy.array`
-        A 2d or 3d array wich should be rolled.
+        A 2d or 3d array which should be rolled.
         steps : `int`
             Number of steps of rolling. Negative numbers for rolling in
             negative direction.
@@ -461,7 +461,7 @@ class LdftModel(abc.ABC):
                     shift_axis)
 
     def _boundary_roll(self, r, steps, axis=0):
-        """Performes the rolling of a density profile under consideration
+        """Performs the rolling of a density profile under consideration
         of the boundary condition in the class variable ``_bound_cond``.
         If the boundary condition is not 'periodic', then the function
         ``_tilted_roll`` is applied in an appropriate way to satisfy the
@@ -516,13 +516,13 @@ class LdftModel(abc.ABC):
 
     @staticmethod
     def _cal_Phi_0(x):
-        """Calculates the free energy density of a 0d-cavety depending
+        """Calculates the free energy density of a 0d-cavity depending
         on the packing fraction.
 
         Parameters
         ----------
         x : `float`
-            The packing fraction at which the 0d-cavety is evaluated
+            The packing fraction at which the 0d-cavity is evaluated
 
         Returns
         -------
@@ -535,7 +535,7 @@ class LdftModel(abc.ABC):
     @staticmethod
     def _cal_dPhi_0(x):
         """Calculates the derivative of the free energy density of a
-        0d-cavety with respect of the packing fraction.
+        0d-cavity with respect of the packing fraction.
 
         Parameters
         ----------
@@ -553,7 +553,7 @@ class LdftModel(abc.ABC):
     @staticmethod
     def _cal_d2Phi_0(x):
         """Calculates the second derivative of the free energy density
-        of a 0d-cavety with respect of the packing fraction.
+        of a 0d-cavity with respect of the packing fraction.
 
         Parameters
         ----------
@@ -574,23 +574,23 @@ class LdftModel(abc.ABC):
     #####################################################################
     def _make_picard_update(self, alpha):
         """Runs one Picard-Iteration. The instance variable ``_mu_fix``
-        decides wether the density or the chemical potential is to be
-        kept fixt during the iteration. When ``_mu_fix[i]``==`False` for
+        decides whether the density or the chemical potential is to be
+        kept fixed during the iteration. When ``_mu_fix[i]``==`False` for
         one species ``i``, the density is kept fix for this species and
-        the ``_mu``-attribut for the same is updated. In case of `True`,
+        the ``_mu``-attribute for the same is updated. In case of `True`,
         the chemical potential ``_mu[i]`` is kept constant and the
         density `_dens[i]` is going to be updated. The variable `_r` is
         being updated, where the updated `r` is a superposition of the
-        old ``_r`` and the iterated ``r``. The `alpha`-parameter steres
+        old ``_r`` and the iterated ``r``. The `alpha`-parameter steers
         the contribution of the iterated ``r`` to that superposition.
-        Finaly 'self._it_counter'-Variable is increased by one.
+        Finally 'self._it_counter'-Variable is increased by one.
 
         Parameters
         ----------
         alpha : `Float`
             Value between 0 and 1. Determines how 'fast' the iteration
             is done (The higher, the faster). In case of to high
-            ``alpha`` the danger of devergence arrises.
+            ``alpha`` the danger of divergence arises.
 
         Returns
         -------
@@ -598,7 +598,7 @@ class LdftModel(abc.ABC):
             The iterated density profile.
         error : `List`
             The error for each species.
-            In case of divergence prints 'divergiert!!!' and returns nothing.
+            In case of divergence prints 'divergent!!!' and returns nothing.
         """
         mu_ex = self.cal_mu_ex()
         temp = [np.exp(mu_ex[i]-self._v_ext[i])\
@@ -607,7 +607,7 @@ class LdftModel(abc.ABC):
         V= reduce(lambda a, b: a*b, self._size)
         for i,temp_i in enumerate(temp):
             if np.any(np.isnan(temp_i)):
-                print('divergiert!!!')
+                print('divergent!!!')
                 return
             if self._mu_fix[i]:
                 r=temp_i*np.exp(self._mu[i])
@@ -633,9 +633,9 @@ class LdftModel(abc.ABC):
         prematurely aborted when the iteration error fall below a minimal
         error ``min_err``. When ``self._it_counter`` reaches certain
         values (checkpoints) the current profile is appended to the
-        ``self._r_hist``-atribut by calling ``_append_hist``. The next
+        ``self._r_hist``-attribute by calling ``_append_hist``. The next
         checkpoint is calculated by ``_set_new_checkp`` according to the
-        parameter ``checkp_method``. Befor exiting the function the last
+        parameter ``checkp_method``. Before exiting the function the last
         profile is also appended to ``_err_hist`` with ``_append_hist``.
 
         Parameters
@@ -643,11 +643,11 @@ class LdftModel(abc.ABC):
         alpha : `Float`
             Value between 0 and 1. Determines how 'fast' the iteration is
             done (The higher, the faster). In case of to high ``alpha``
-            the danger of devergence arrises.
+            the danger of divergence arises.
         it_steps : `Int`
             Number of iteration steps
          checkp_method : `String`
-            Determines in which intervalls the profile should be
+            Determines in which intervals the profile should be
             appended to the ``_r_hist``-attribute. Possible values:
             integer number, 'exp#', 'dec#' where # needs to be replaced
             by a number. See description of ``_set_new_checkp``.
@@ -670,15 +670,15 @@ class LdftModel(abc.ABC):
 
     def _set_new_checkp(self, checkp_method):
         """Calculates the next 'checkpoint' meaning an iteration number
-        at which the curent density profile ``_r`` should be appended to
-        ``self._r_hist``. The next checkpoint is determined by the curent
-        value of ``_it_counter`` and the methode defined by the
+        at which the current density profile ``_r`` should be appended to
+        ``self._r_hist``. The next checkpoint is determined by the current
+        value of ``_it_counter`` and the method defined by the
         parameter ``checkp_method``. 
         
         Parameters
         ----------
         checkp_method : `String` or `Int`
-            Determines how the next checkpoint is calculated. Recomended
+            Determines how the next checkpoint is calculated. Recommended
             value: 'dec2'. It can take the following values:
             integer value (for equidistant checkpoints with interval of
             the integer); 'exp#' where # is to be replaced by a float
@@ -713,12 +713,12 @@ class LdftModel(abc.ABC):
 
     def create_init_profile(self, dens=None, shape=None):
         """Creates an initial density profile for each species the
-        picarid iteration can start with. A list of average density of
+        picard iteration can start with. A list of average density of
         each species is handed over via the ``dens``-parameter.
-        Additionaly a nucleus can be placed in the density profile of
+        Additionally a nucleus can be placed in the density profile of
         each species, the shape of which determined by the
         ``shape``-parameter. Calls the function ``self.set_r`` to set
-        the density profile to the varialbe ``_r``. The Nucleus further
+        the density profile to the variable ``_r``. The Nucleus further
         satisfies the boundary condition ``_bound_cond``
 
         Parameters
@@ -736,14 +736,14 @@ class LdftModel(abc.ABC):
         self.set_r(r)
 
     def return_hom_densProfile(self, dens):
-        """Returns a homogenious one species density profile with
+        """Returns a homogeneous one species density profile with
         density according to the parameter ``dens``. The shape of which
         is determined by the `_size`-instance variable.
 
         Parameters
         ----------
         dens : `Float`
-            Density of the homogenious profile.
+            Density of the homogeneous profile.
 
         Returns
         -------
@@ -810,7 +810,7 @@ class LdftModel(abc.ABC):
     def set_r(self, r):
         """This function is used for assigning a new initial profile
         ``r`` to the instance variable ``_r``. Therefor the
-        ``_it_counter`` is beeing reseted to '0' and the history
+        ``_it_counter`` is being reset to '0' and the history
         attributes ``_r_hist``, ``_it_hist``, ``_err_hist`` are updated.
         
         Parameters
@@ -826,19 +826,19 @@ class LdftModel(abc.ABC):
         self._err_hist =[]
 
     def set_hist(self, r_hist, it_hist, err_hist):
-        """This function is to manualy set the internal history
+        """This function is to manually set the internal history
         variables ``_r_hist``, ``_it_hist`` and ``_err_hist``. The last
         entry of the ``r_hist``-parameter is assigned to the instance
         variable ``_r``, which is the current density profile.
 
         Parameters
         ----------
-        r_hist : `list` of `list` of `numpy.ndaray`
+        r_hist : `list` of `list` of `numpy.ndarray`
             Iteration history of the density profile. This parameter
             should be of the following format [profile_0, profile_1,...]
             where ``profile_i`` is the profile of the i'th iteration
-            step and has the format [r_1, r_2, ...], where the entrys
-            are the profile of the coresponding species.
+            step and has the format [r_1, r_2, ...], where the entries
+            are the profile of the corresponding species.
         it_hist : `list` of `int`
             This parameter lists the corresponding iteration steps of
             the ``r_hist`` parameter.
@@ -869,7 +869,7 @@ class LdftModel(abc.ABC):
         ----------
         path : `String`
             Directory in which the system should be stored (needs to be
-            a absolut path)
+            a absolute path)
         filename : `String`
             The filename under which the system should be stored.
         """
@@ -881,7 +881,7 @@ class LdftModel(abc.ABC):
     @classmethod
     def load_syst(cls, path, filename):
         """Uses ``pickle.load`` to load a system. It is strongly
-        recommended to override this method in the inheritated classes,
+        recommended to override this method in the inherited classes,
         as the returned system might be of an outdated type! A typecast
         should be implemented!
 
@@ -889,14 +889,14 @@ class LdftModel(abc.ABC):
         ----------
         path : `String`
             Directory in which the system is stored which one want's to
-            load (needs to be a absolut path)
+            load (needs to be a absolute path)
         filename: `String`
-            The filename under which the system of intrest is stored.
+            The filename under which the system of interest is stored.
         
         Returns
         -------
         Model : `LdftModel`
-            The returned model propably has the type of an inheritated
+            The returned model probably has the type of an inherited
             class. It might also be the class of an outdated type.
         """
         path=os.path.join(path, filename)
@@ -1005,10 +1005,10 @@ class LdftModel(abc.ABC):
             plotted.
         rows : `int`; optional: default = 10
             Number of iteration-steps which shall be plotted. This
-            parameter is just be considdered when the parameter
+            parameter is just be considered when the parameter
             ``idx_list`` is `None`.
         idx_list : `List`; optional: default = None
-            If `None`, the iteration steps which are ploted are choosen
+            If `None`, the iteration steps which are plotted are chosen
             equidistant in the ``_it_hist``-list. Alternatively one can
             choose ones own list. This list, however, does not contain
             the iteration-steps which shall be plotted, but the indices
@@ -1059,10 +1059,10 @@ class LdftModel(abc.ABC):
             plotted.
         rows : `int`; optional: default = 10
             Number of iteration-steps which shall be plotted. This
-            parameter is just be considdered when the parameter
+            parameter is just be considered when the parameter
             ``idx_list`` is `None`.
         idx_list : `List`; optional: default = None
-            If `None`, the iteration steps which are ploted are choosen
+            If `None`, the iteration steps which are plotted are chosen
             equidistant in the ``_it_hist``-list. Alternatively one can
             choose ones own list. This list, however, does not contain
             the iteration-steps which shall be plotted, but the indices
@@ -1112,7 +1112,7 @@ class LdftModel(abc.ABC):
         Parameters
         ----------
         dens : `List`
-            The denstity for each species.
+            The density for each species.
 
         Returns
         -------
@@ -1123,19 +1123,19 @@ class LdftModel(abc.ABC):
     @abc.abstractmethod
     def _cal_coex_dens(self):
         """Calculates the coexisting densities of bulk system for each
-        species under the parameters of the current instance ``selfe``.
+        species under the parameters of the current instance ``self``.
 
         Returns
         -------
-        Coexisting densityes : `List` of `Tuple`
-            The coexisting densities arrangend in a List of Tuples. Each
+        Coexisting densities : `List` of `Tuple`
+            The coexisting densities arranged in a List of Tuples. Each
             species corresponds to a Tuple of the form:
             (vapour_dens, liquid_dens)
         """
         pass
 
     def cal_p_vap(self):
-        """Calculates the coexisting pressures under the the current
+        """Calculates the coexisting pressures under the current
         parameters of the system (``_mu``, ``_dens``) and returns the
         vapour pressure.
 
@@ -1150,7 +1150,7 @@ class LdftModel(abc.ABC):
         return p
 
     def cal_p_liq(self):
-        """Calculates the coexisting pressures under the the current
+        """Calculates the coexisting pressures under the current
         parameters of the system (``_mu``, ``_dens``) and returns the
         liquid pressure.
 
@@ -1165,7 +1165,7 @@ class LdftModel(abc.ABC):
         return p
 
     def det_intface_shape(self):
-        """Determines the shpae of the interface of the current
+        """Determines the shape of the interface of the current
         configuration. It requires the inhomogeneities to be centered in
         the system.
 
@@ -1201,7 +1201,7 @@ class LdftModel(abc.ABC):
 
     def cal_del_Om(self):
         """Calculates the delta between the current grand potential and
-        the one by a homgenious system of (oversatured) vapor with the
+        the one by a homogeneous system of (oversaturated) vapor with the
         same chemical potential as the current system.
 
         Returns
@@ -1244,14 +1244,14 @@ class LdftModel(abc.ABC):
         ``em_species``. In case of cylinder configurations in three
         dimensions the cylinder has to point in the 0th axis of the
         density profile ``self._r``. This function does only work
-        properly, if a droplet/cylinder is empedded in a supersaturated
-        vapour. For configurtions of bubbles or vapour cylinders
+        properly, if a droplet/cylinder is embedded in a supersaturated
+        vapour. For configurations of bubbles or vapour cylinders
         embedded in liquid, the result will be wrong.
 
         Parameters
         ----------
         em_species : `Int`; Optional: default=0
-            Decides for which species the equimolar radious should
+            Decides for which species the equimolar radius should
             be calculated
         
         Returns
@@ -1283,7 +1283,7 @@ class LdftModel(abc.ABC):
         Parameters
         ----------
         R : `Float`
-            Radius at which the surfacetenstion should be calculated
+            Radius at which the surface tension should be calculated
         
         Returns
         -------
@@ -1334,8 +1334,8 @@ class LdftModel(abc.ABC):
         the equimolar surface of a given species. In case of cylinder
         configurations in three dimensions the cylinder has to point in
         the 0th axis of the density profile ``self._r``. This function
-        does only work properly, if a droplet/cylinder is empedded in a
-        supersaturated vapour. For configurtions of bubbles or vapour
+        does only work properly, if a droplet/cylinder is embedded in a
+        supersaturated vapour. For configurations of bubbles or vapour
         cylinders embedded in liquid, the result will be wrong.
         
         Parameters
@@ -1355,8 +1355,8 @@ class LdftModel(abc.ABC):
     def cal_adsorptionAtSurfOfTens(self, species=0):
         """Calculates the adsorption for spheres/circles in 3d/2d at the
         surface of tension for a given species. This function
-        does only work properly, if a droplet/cylinder is empedded in a
-        supersaturated vapour. For configurtions of bubbles or vapour
+        does only work properly, if a droplet/cylinder is embedded in a
+        supersaturated vapour. For configurations of bubbles or vapour
         cylinders embedded in liquid, the result will be wrong.
 
         Parameters
@@ -1392,8 +1392,8 @@ class LdftModel(abc.ABC):
         return N_x, adsorption
 
     def cal_gamma_inf(self, area):
-        """Calculates the surfacetension of a flat interface. This
-        function can not deterine the area of the surface itself.
+        """Calculates the surface tension of a flat interface. This
+        function can not determine the area of the surface itself.
         Therefore it has to be passed as parameter.
 
         Parameters
