@@ -226,7 +226,7 @@ dens_pc2(self) : `floag`, read-only
     The average density of the polymer clusters in y-direction.
 
 mu_fix_c(self) : `Bool`, read and write
-    """Flag which determines Wether the colloids (a.k. the particles
+    Flag which determines Wether the colloids (a.k. the particles
     of the lattice gas) are treated canonical (`False`) or grand
     canonical (`True`). (`Bool`)
 
@@ -277,14 +277,14 @@ _dens_pc2(self) : `folat`, read-only
     The average density of the polymer species in x-direction
 
 _v_ext_c(self) : `np.array`, read-only
-    """The external potential acting on the colloids
+    The external potential acting on the colloids
 
 _v_ext_pc1(self) : `np.array`, read-only
     The external potential acting on the polymer clusters in
     x-direction.
 
 _v_ext_pc2(self) : `np.array`, read-only
-    """The external potential acting on the polymer clusters in
+    The external potential acting on the polymer clusters in
     y-direction.
 
 _r_c(self) : `numpy.ndarray`, read-only
