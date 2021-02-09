@@ -38,8 +38,8 @@ class LG2dAOHighl(LdftModel):
     mu_fix_c : `bool`, optional: default = False
         Determines whether or not the system is treated canonical or
         grand canonical. Meant is the lattice gas system. This parameter
-        therefore only steres the colloid-species. The others are set
-        `True` by defalut. `False` for canonical.
+        therefore only steers the colloid-species. The others are set
+        `True` by default. `False` for canonical.
     mu_c : `float`, optional: default = `None`
         The chemical potential for the colloid species (multiplied with
         the inverse temperature to make it's dimension 1). Just required
@@ -51,18 +51,18 @@ class LG2dAOHighl(LdftModel):
         is not required, as for those ``mu_fix`` is set `True`.
     v_ext_c : `numpy.ndarray`, optional: default=`None`
         An external potential for the colloids. Shape must be of the
-        same shape as choosen in ``size``. This class does not consider
+        same shape as chosen in ``size``. This class does not consider
         the possibility of sticky walls. Therefore the external
         potential of polymers is set zero by default.
     bound_cond : `string`, optional: default='periodic'
         The boundary condition. Supports 'periodic' for periodic
         boundary conditions and '11_if' for a 45° tilted system with
         respect to the lattice. The latter is for creating slab
-        interface with (11) orientation. If '11_if' is choosen then one
-        dimension has to be choosen twice as the other dimension in the
+        interface with (11) orientation. If '11_if' is chosen then one
+        dimension has to be chosen twice as the other dimension in the
         ``size`` parameter e.g. (64, 128). Default value is 'periodic'.
     r : `List` of `np.array`; Optional: default = `None`
-        Desity profile for all thre species arranged in a `List`. Choose
+        Density profile for all three species arranged in a `List`. Choose
         `None` in case you hand over the ``r_hist``-parameter or in case
         you do not want to set the variable yet.
     r_hist : `List` of `List` of `np.array`; Optional: default = `None`
@@ -76,10 +76,10 @@ class LG2dAOHighl(LdftModel):
     err_hist : `List` of `Tuple` of `Float`; Optional: default = `None`
         Contains the error at the picard-steps corresponding to the
         entries of `r_hist`. The entries are tuples containing an error
-        for every species. Use `None` if no history availabe.
+        for every species. Use `None` if no history available.
     it_hist : `List`; Optional: default = `None`
-        List of the picardsteps corresponding to the density profiles at
-        the ``r_hist``-parameter. Use `None` if no history availabe.
+        List of the picard-steps corresponding to the density profiles at
+        the ``r_hist``-parameter. Use `None` if no history available.
         Note: if ``r_hist`` is given then also this argument should be
         assigned with an appropriate list.
     """
@@ -112,16 +112,16 @@ class LG2dAOHighl(LdftModel):
 
     ####################################################################
     #Protected descriptors for internal use. These are for a more
-    #convenient adresseing of the species specific instance variables.
+    #convenient addressing of the species specific instance variables.
     #Important to notice: do not override the protected variables of the
     #super class LdftModel. Otherwise the functionality of the instance
-    #methodes in LdftModel can not be secured.
+    #methods in LdftModel can not be secured.
     ####################################################################
 
     @property
     def _mu_c(self):
-        """The chemical potential of the coloid species (times the
-        inverse temperatue to make its dimension 1)
+        """The chemical potential of the colloid species (times the
+        inverse temperature to make its dimension 1)
         (`float`, read-only).
         """
         return self._mu[0]
@@ -129,7 +129,7 @@ class LG2dAOHighl(LdftModel):
     @property
     def _mu_pc1(self):
         """The chemical potential of the polymer species in x-direction
-        (times the inverse temperatue to make its dimension 1).
+        (times the inverse temperature to make its dimension 1).
         (`float`, read-only)
         """
         return self._mu[1]
@@ -137,14 +137,14 @@ class LG2dAOHighl(LdftModel):
     @property
     def _mu_pc2(self):
         """The chemical potential of the polymer species in y-direction
-        (times the inverse temperatue to make its dimension 1).
+        (times the inverse temperature to make its dimension 1).
         (`float`, read-only)
         """
         return self._mu[2]
 
     @property
     def _dens_c(self):
-        """The average density of the coloid species (`float`,
+        """The average density of the colloid species (`float`,
         read-only).
         """
         return self._dens[0]
@@ -186,7 +186,7 @@ class LG2dAOHighl(LdftModel):
 
     @property
     def _r_c(self):
-        """The density profile of the coloid species. (`numpy.ndarray`,
+        """The density profile of the colloid species. (`numpy.ndarray`,
         read-only)
         """
         return self._r[0]
@@ -208,13 +208,13 @@ class LG2dAOHighl(LdftModel):
 
     ####################################################################
     #Public descriptors. These are for the user to access the variables
-    #of intrest. Some are already defined in the super class. Some of
+    #of interest. Some are already defined in the super class. Some of
     #them are reused, but others are overwritten.
     ####################################################################
 
     @property
     def epsi(self):
-        """The attraction strengs between the lattice-particles of the
+        """The attraction strength between the lattice-particles of the
         lattice gas. (`Float`, read-only)
         """
         return self.translate_mu_pc_to_epsi(self._mu_pc1)
@@ -222,7 +222,7 @@ class LG2dAOHighl(LdftModel):
     @property
     def mu_c(self):
         """The chemical potential of the colloids (times the inverse
-        temperatue to make its dimension 1). It is equals the chemical
+        temperature to make its dimension 1). It is equals the chemical
         potential of the particles of the lattice gas. (`float`)
         """
         return self._mu[0]
@@ -271,7 +271,7 @@ class LG2dAOHighl(LdftModel):
     
     @property
     def mu_fix_c(self):
-        """Flag which determines wether the colloids (a.k. the particles
+        """Flag which determines Wether the colloids (a.k. the particles
         of the lattice gas) are treated canonical (`False`) or grand
         canonical (`True`). (`Bool`)
         """
