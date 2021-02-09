@@ -29,8 +29,8 @@ The following features are supported:
 - Creation of individual initial profiles (see ``create_init_profile``)
     - Help functions for creating more customized profiles (``return_hom_densProfile``, ``return_nuc_densProfile``)
 - Easy save and load methods to save the iterated sample and reuse it later (``save_syst``, ``load_syst``)
-- Some pre-implemented functions for representation of
-    - samples (``print_2d_profile``, ``print_2d_profile2``, ``print_2d_hist``, ``print_2d_hist2``, )
+- Some pre-implemented functions for representation of:
+    - samples (``print_2d_profile``, ``print_2d_profile2``, ``print_2d_hist``, ``print_2d_hist2``)
     - the error history (``print_error``)
 - Some functions to calculate interface properties
     - calculate droplet radius at the surface of tension or equimolar dividing surface (``cal_R_s``, ``cal_R_em``)
