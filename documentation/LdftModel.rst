@@ -298,8 +298,8 @@ is treated grand canonically and every other canonical).
 
 The semi-grand potential : `Float`
 
-*abstractmethod* cal_mu_ex(self)
-''''''''''''''''''''''''''''''''
+*abstractmethod* ``cal_mu_ex(self)``
+''''''''''''''''''''''''''''''''''''
 Calculates the excess chemical potential of the models current
 density profile
 
@@ -346,7 +346,7 @@ which should be rolled.
 **Parameters**
 
 array : `numpy.array`
-A 2d or 3d array which should be rolled.
+    A 2d or 3d array which should be rolled.
 steps : `int`
     Number of steps of rolling. Negative numbers for rolling in
     negative direction.
@@ -492,7 +492,7 @@ alpha : `Float`
     the danger of divergence arises.
 it_steps : `Int`
     Number of iteration steps
- checkp_method : `String`
+checkp_method : `String`
     Determines in which intervals the profile should be
     appended to the ``_r_hist``-attribute. Possible values:
     integer number, 'exp#', 'dec#' where # needs to be replaced
