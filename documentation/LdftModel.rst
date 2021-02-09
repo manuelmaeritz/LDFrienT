@@ -16,6 +16,27 @@ through various instance variables and functions. If you want to
 define your one model, just create a class inheriting "LdftModel"
 and overwrite the abstract methods.
 
+The following features are supported:
+
+- Multiple species
+    - Decide individually which species should be considered canonical or grand-canonical during picard iteration with the ``_mu_fix``-attribute
+- Various boundary conditions
+    - supported are 'periodic' and some tilted boundary conditions (for creating tilted liquid-vapor-interfaces) (see the ``_bound_cond``-attribute)
+    - Further individual boundary conditions may be added, by modifying the ``_boundary_roll``-method
+- Calculating the grand-canonical and a semi-grand-potential from your free energy (see ``cal_Om`` and ``cal_semi_Om`` methodes)
+- Help functions for implementing your free energy functional (see ``_cal_Phi_id``, ``_cal_Phi_0``, ``_cal_dPhi_0``, ``_cal_d2Phi_0``)
+- Functions for picard iteration (see ``make_picard_iteration``)
+- Creation of individual initial profiles (see ``create_init_profile``)
+    - Help functions for creating more customized profiles (``return_hom_densProfile``, ``return_nuc_densProfile``)
+- Easy save and load methods to save the iterated sample and reuse it later (``save_syst``, ``load_syst``)
+- Some pre-implemented functions for representation of
+    - samples (``print_2d_profile``, ``print_2d_profile2``, ``print_2d_hist``, ``print_2d_hist2``, )
+    - the error history (``print_error``)
+- Some functions to calculate interface properties
+    - calculate droplet radius at the surface of tension or equimolar dividing surface (``cal_R_s``, ``cal_R_em``)
+    - calculate surface tensions at various dividing surfaces (``cal_gamma_R``, ``cal_gamma_s``, ``cal_gamma_em``, ``cal_gamma_inf``)
+
+
 Parameters
 ----------
 size : `Tuple`
