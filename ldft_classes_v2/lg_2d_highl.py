@@ -342,18 +342,18 @@ class LG2dAOHighl(LdftModel):
     @staticmethod
     def translate_epsi_to_mu_pc(epsi):
         """Maps the attraction strength of the lattice gas ``epsi`` to
-        the corresponding polymercluster chemical potential.
+        the corresponding polymer cluster chemical potential.
 
         Parameters
         ----------
         epsi : `float`
             The attraction strength (multiplied with the inverse
-            temperature to make the quantitiy dimensionless).
+            temperature to make the quantity dimensionless).
 
         Returns
         -------
         mu_pc : The chemical potential (multiplied with the inverse
-            temperature to make the quantitiy dimensionless). (`float`)
+            temperature to make the quantity dimensionless). (`float`)
 
         """
         mu_pc=np.log(np.exp(epsi)-1)
@@ -361,26 +361,26 @@ class LG2dAOHighl(LdftModel):
 
     @staticmethod
     def translate_mu_pc_to_epsi(mu_pc):
-        """Maps the polymercluster chemical potential to the attraction
+        """Maps the polymer cluster chemical potential to the attraction
         strength of the lattice gas ``epsi``.
 
         Parameters
         ----------
         mu_pc : `float`
             The polymer chemical potential (multiplied with the inverse
-            temperature to make the quantitiy dimensionless).
+            temperature to make the quantity dimensionless).
 
         Returns
         -------
         epsi : The attraction strength (multiplied with the inverse
-            temperature to make the quantitiy dimensionless). (`float`)
+            temperature to make the quantity dimensionless). (`float`)
 
         """
         epsi=np.log(np.exp(mu_pc)+1)
         return epsi
 
     ####################################################################
-    #The inhomogenious functional:
+    #The inhomogeneous functional:
     #In this section all the functions concerning the model specific
     #free energy functional are defined.
     ####################################################################
@@ -430,7 +430,7 @@ class LG2dAOHighl(LdftModel):
         a correction term accounting for the zero- and one-body
         interaction of the polymers (see description of the class). For
         getting the free energy of the lattice gas use ``cal_F_lg``,
-        which is the semigrand potential, where the polymer clusters are
+        which is the semi-grand potential, where the polymer clusters are
         treated grand canonically and the colloids canonically.
 
         Returns
@@ -457,7 +457,7 @@ class LG2dAOHighl(LdftModel):
 
     def cal_F_lg(self):
         """Calculates the free energy of the lattice gas. If
-        ``self.mu_fix==False`` this schould give the same result as the
+        ``self.mu_fix==False`` this should give the same result as the
         ``cal_semi_Om``-function.
 
         Returns
@@ -491,22 +491,22 @@ class LG2dAOHighl(LdftModel):
         return mu_c_ex, mu_pc1_ex, mu_pc2_ex
 
     ####################################################################
-    #The homogenious methodes:
-    #The following section contains all the methodes concerning the bulk
+    #The homogeneous methods:
+    #The following section contains all the methods concerning the bulk
     #properties of the system.
     ####################################################################
 
     @classmethod
     def _cal_bulk_r_pc(cls, r_c, epsi):
         """Calculates the bulk polymer cluster density in dependence of
-        the the coloid density and the choosen attraction strength
+        the colloid density and the chosen attraction strength
 
         Parameters
         ----------
         r_c : `float` or `np.ndarray`
-            The coloid density.
+            The colloid density.
         epsi : `float`
-            Attraction strengs (times inverse temperature).
+            Attraction strength (times inverse temperature).
 
         Returns
         -------
@@ -523,13 +523,13 @@ class LG2dAOHighl(LdftModel):
     @classmethod
     def _cal_bulk_dr_pc(cls, r_c, epsi):
         """Calculates the derivative of the bulk polymer cluster density
-        with respect to the coloidal density in dependence of
-        the the coloid density and the chosen attraction strength
+        with respect to the colloidal density in dependence of
+        the colloid density and the chosen attraction strength
 
         Parameters
         ----------
         r_c : `float` or `np.ndarray`
-            The coloid density.
+            The colloid density.
         epsi : `float`
             Attraction strength (times inverse temperature).
 
@@ -551,7 +551,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `Float` or `np.ndarray`
-            The coloidal density.
+            The colloidal density.
         epsi : `Float`
             Attraction strength
 
@@ -575,7 +575,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `Float` or `np.ndarray`
-            The coloidal density.
+            The colloidal density.
         epsi : `Float`
             Attraction strength
 
@@ -602,7 +602,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            Coloid density
+            Colloid density
         r_pc : `float`
             Polymer cluster density
 
@@ -622,7 +622,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            Coloid density
+            Colloid density
         r_pc : `float`
             Polymer cluster density
 
@@ -643,7 +643,7 @@ class LG2dAOHighl(LdftModel):
     def cal_bulk_f_lg(cls, r_c, epsi):
         """Calculates the free energy density of the bulk lattice gas
         under given density. (The function is the same as in
-        ``cal_F_lg`` but simplified for bulk sytems.)
+        ``cal_F_lg`` but simplified for bulk systems.)
 
         Parameters
         ----------
@@ -669,12 +669,12 @@ class LG2dAOHighl(LdftModel):
     @classmethod
     def cal_bulk_om_lg(cls, r, epsi):
         """Calculates the grand potential density for a bulk lattice gas
-        under given densitie.
+        under given densities.
 
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
@@ -696,7 +696,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
@@ -717,7 +717,7 @@ class LG2dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            The coloid density of the system
+            The colloid density of the system
         *args:
             First argument: Attraction strength (times inverse
             temperature). (`float`)
@@ -745,12 +745,12 @@ class LG2dAOHighl(LdftModel):
         mu : `Float`
             The chemical potential of the lattice gas.
         epsi : `Float`
-            The attraction strength (times inverse temperatue).
+            The attraction strength (times inverse temperature).
 
         Returns
         -------
         r_coex : `Tuple`
-            The coexisting densities arrangend in a tuple of the shape 
+            The coexisting densities arranged in a tuple of the shape 
             (vapour_dens, liquid_dens)
         """
         def dmu(rc, *args):
@@ -771,8 +771,8 @@ class LG2dAOHighl(LdftModel):
 
 
     ####################################################################
-    #In the following section the abc-methodes concerning the surface
-    #prperties of the mother class are overridden.
+    #In the following section the abc-methods concerning the surface
+    #properties of the mother class are overridden.
     ####################################################################
 
     def _cal_p(self, dens):

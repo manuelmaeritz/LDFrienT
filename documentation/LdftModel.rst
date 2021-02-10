@@ -215,7 +215,7 @@ it_counter : `int`, read-only
 dim : `int`, read-only
     Accesses the ``_dim``-attribute
 
-Methodes
+Methods
 --------
 
 ``__init__(self, size, mu_fix, mu=None, dens=None, v_ext=None, r=None, r_hist=None, err_hist=None, it_hist=None, bound_cond='periodic')``
@@ -287,6 +287,8 @@ bound_cond : `String`; Optional: default value 'periodic'
 ``__str__(self)``
 '''''''''''''''''
 
+Methods concerning the functional
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *abstractmethod* ``cal_F(self)``
 ''''''''''''''''''''''''''''''''
