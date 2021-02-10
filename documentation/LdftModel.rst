@@ -219,86 +219,141 @@ Methods
 --------
 
 ``__init__(self, size, mu_fix, mu=None, dens=None, v_ext=None, r=None, r_hist=None, err_hist=None, it_hist=None, bound_cond='periodic')``
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-**Parameters**
 
-size : `Tuple`
-    It defines the amount of lattice sites for each dimension.
-mu : `List`, optional: default = `None`
-    Contains the chemical potential for every species. Supports also
-    type `None` as entry (eg. [0.3, None, None]), if just the
-    chemical potential of certain species should be given. See also
-    ``mu_fix``. Choose `None` if you do not want to set any entry.
-dens : `List`; Optional: default = `None`
-    Contains the systems average density for every species. Supports
-    also `None` as entry (eg. [None, 0.4, 0.4]), if just the
-    density of a certain species should be given. See also
-    ``mu_fix``. Choose `None` if you do not want to set any entry.
-mu_fix : `List`
-    Contains a boolean value for each species deciding whether the
-    chemical potential should be kept fixed during picard iteration
-    or not. `True` value treads the corresponding species as
-    grand-canonical, `False`-species are treated canonical. The
-    ``True``-values require a number value in the corresponding
-    ``mu``-argument whereas the ``False``-values require a number
-    value in the ``density``-argument at a picard-iteration.
-v_ext : `List`; Optional: default = `None`
-    List of numpy.array of same shape as the ``size``-parameter.
-    Contains an external potential for every species. Choose `None`,
-    for zero external potential for every species.
-r : `List`; Optional: default = `None`
-    List of numpy.array of same shape as the ``size``-parameter. Each
-    array corresponds to the density profile of a species. Choose
-    `None` in case you hand over the ``r_hist``-parameter or in case
-    you do not want to set the variable yet.
-r_hist : `List`; Optional: default = `None`
-    Picard-history of a density profile. It contains the density
-    profiles for certain picard-steps of a system which has already
-    been evolved through picard iteration. Every entry is of the
-    format of the ``r``-parameter. Use `None` if the system has no
-    history yet.
-err_hist : `List`;  Optional: default = `None`
-    Contains the error at the picard-steps corresponding to the
-    entries of `r_hist`. The entries are lists containing an error
-    for every species. Use `None` if no history available.
-it_hist : `List`; Optional: default = `None`
-    List of the picard steps corresponding to the density profiles at
-    the ``r_hist``-parameter. Use `None` if no history available.
-    Note: if ``r_hist`` is given then also this argument should be
-    assigned with an appropriate list.
-bound_cond : `String`; Optional: default value 'periodic'
-    Determines the boundary condition (bc). Values available:
-    'periodic' for periodic bc, '11_if' for 2d systems with 45°
-    tilted bc (to create 45° slab interfaces (11-interfaces)),
-    '110_if' for 3d systems with a 45° tilted bc with respect to one
-    axis (for 110-interfaces), '111_if' for 3d systems with a 45°
-    tilted bc with respect to two axis (for 111-interfaces). For
-    '11_if', '110_if' and '111_if' the ``size``-argument should be
-    chosen in that way, the first two axis are of equal length and
-    one and the last one is of twice that length (cuboid with square
-    front face and long edge twice the short edges). If one wants to
-    make use of the ``bound_cond``-argument one needs to use the
-    ``_boundary_roll``-method for rolling the density profile
-    instead of numpy.roll in the class implementing the specific
-    model. The variable can be easily extended to further accepted
-    values by adapting the ``self._boundary_roll``-method.
+    **Parameters**
 
+    size : `Tuple`
+        It defines the amount of lattice sites for each dimension.
+    mu : `List`, optional: default = `None`
+        Contains the chemical potential for every species. Supports also
+        type `None` as entry (eg. [0.3, None, None]), if just the
+        chemical potential of certain species should be given. See also
+        ``mu_fix``. Choose `None` if you do not want to set any entry.
+    dens : `List`; Optional: default = `None`
+        Contains the systems average density for every species. Supports
+        also `None` as entry (eg. [None, 0.4, 0.4]), if just the
+        density of a certain species should be given. See also
+        ``mu_fix``. Choose `None` if you do not want to set any entry.
+    mu_fix : `List`
+        Contains a boolean value for each species deciding whether the
+        chemical potential should be kept fixed during picard iteration
+        or not. `True` value treads the corresponding species as
+        grand-canonical, `False`-species are treated canonical. The
+        ``True``-values require a number value in the corresponding
+        ``mu``-argument whereas the ``False``-values require a number
+        value in the ``density``-argument at a picard-iteration.
+    v_ext : `List`; Optional: default = `None`
+        List of numpy.array of same shape as the ``size``-parameter.
+        Contains an external potential for every species. Choose `None`,
+        for zero external potential for every species.
+    r : `List`; Optional: default = `None`
+        List of numpy.array of same shape as the ``size``-parameter. Each
+        array corresponds to the density profile of a species. Choose
+        `None` in case you hand over the ``r_hist``-parameter or in case
+        you do not want to set the variable yet.
+    r_hist : `List`; Optional: default = `None`
+        Picard-history of a density profile. It contains the density
+        profiles for certain picard-steps of a system which has already
+        been evolved through picard iteration. Every entry is of the
+        format of the ``r``-parameter. Use `None` if the system has no
+        history yet.
+    err_hist : `List`;  Optional: default = `None`
+        Contains the error at the picard-steps corresponding to the
+        entries of `r_hist`. The entries are lists containing an error
+        for every species. Use `None` if no history available.
+    it_hist : `List`; Optional: default = `None`
+        List of the picard steps corresponding to the density profiles at
+        the ``r_hist``-parameter. Use `None` if no history available.
+        Note: if ``r_hist`` is given then also this argument should be
+        assigned with an appropriate list.
+    bound_cond : `String`; Optional: default value 'periodic'
+        Determines the boundary condition (bc). Values available:
+        'periodic' for periodic bc, '11_if' for 2d systems with 45°
+        tilted bc (to create 45° slab interfaces (11-interfaces)),
+        '110_if' for 3d systems with a 45° tilted bc with respect to one
+        axis (for 110-interfaces), '111_if' for 3d systems with a 45°
+        tilted bc with respect to two axis (for 111-interfaces). For
+        '11_if', '110_if' and '111_if' the ``size``-argument should be
+        chosen in that way, the first two axis are of equal length and
+        one and the last one is of twice that length (cuboid with square
+        front face and long edge twice the short edges). If one wants to
+        make use of the ``bound_cond``-argument one needs to use the
+        ``_boundary_roll``-method for rolling the density profile
+        instead of numpy.roll in the class implementing the specific
+        model. The variable can be easily extended to further accepted
+        values by adapting the ``self._boundary_roll``-method.
+
+----
 
 ``__str__(self)``
-'''''''''''''''''
 
-Methods concerning the functional
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Methods for external use
+^^^^^^^^^^^^^^^^^^^^^^^^
+Those methodes are public and may be called by the user of this class.
+
+Abstract methods
+''''''''''''''''
+These methodes need to be implemented by classes which inherit from this class.
 
 *abstractmethod* ``cal_F(self)``
-''''''''''''''''''''''''''''''''
-Calculates the free energy of the models curent density
-profile (meaning every species treated canonical, as if
-``_mu_fix`` is ``False`` for every species)
 
-**Returns**
+    Calculates the free energy of the models curent density
+    profile (meaning every species treated canonical, as if
+    ``_mu_fix`` is ``False`` for every species)
 
-The free energy : `Float`
+    **Returns**
+
+    The free energy : `Float`
+
+----
+
+*abstractmethod* ``cal_mu_ex(self)``
+
+    Calculates the excess chemical potential of the models current
+    density profile
+
+    **Returns**
+
+    The excess chemical potential : `List`
+
+----
+
+*abstractmethod* ``_cal_p(self, dens)``
+
+    Calculates the pressure for a bulk system with given densities
+    for each species. The other parameters (temperature, attraction
+    strength, etc.) are taken from the current instance ``self``.
+
+    **Parameters**
+
+    dens : `List`
+        The density for each species.
+
+    **Returns**
+
+    The pressure : `Float`
+
+----
+
+*abstractmethod* ``_cal_coex_dens(self)``
+
+    Calculates the coexisting densities of bulk system for each
+    species under the parameters of the current instance ``self``.
+
+    **Returns**
+
+    Coexisting densities : `List` of `Tuple`
+        The coexisting densities arranged in a List of Tuples. Each
+        species corresponds to a Tuple of the form:
+        (vapour_dens, liquid_dens)
+
+
+
+
+
+
+
 
 
 ``cal_Om(self)``
@@ -321,14 +376,7 @@ is treated grand canonically and every other canonical).
 
 The semi-grand potential : `Float`
 
-*abstractmethod* ``cal_mu_ex(self)``
-''''''''''''''''''''''''''''''''''''
-Calculates the excess chemical potential of the models current
-density profile
 
-**Returns**
-
-The excess chemical potential : `List`
 
 
 *classmethod* ``_tilted_roll_3d(cls, array, steps, roll_axis, shift, shift_axis)``
@@ -768,32 +816,7 @@ Figure : `matplotlib.pyplot.figure`
     Plotted history
 
 
-*abstractmethod* ``_cal_p(self, dens)``
-'''''''''''''''''''''''''''''''''''''''
-Calculates the pressure for a bulk system with given densities
-for each species. The other parameters (temperature, attraction
-strength, etc.) are taken from the current instance ``self``.
 
-**Parameters**
-
-dens : `List`
-    The density for each species.
-
-**Returns**
-
-The pressure : `Float` 
-
-*abstractmethod* ``_cal_coex_dens(self)``
-'''''''''''''''''''''''''''''''''''''''''
-Calculates the coexisting densities of bulk system for each
-species under the parameters of the current instance ``self``.
-
-**Returns**
-
-Coexisting densities : `List` of `Tuple`
-    The coexisting densities arranged in a List of Tuples. Each
-    species corresponds to a Tuple of the form:
-    (vapour_dens, liquid_dens)
 
 ``cal_p_vap(self)``
 '''''''''''''''''''
