@@ -38,8 +38,8 @@ class LG3dAOHighl(LdftModel):
     mu_fix_c : `bool`, optional: default = False
         Determines whether or not the system is treated canonical or
         grand canonical. Meant is the lattice gas system. This parameter
-        therefore only steres the colloid-species. The others are set
-        `True` by defalut. `False` for canonical.
+        therefore only steers the colloid-species. The others are set
+        `True` by default. `False` for canonical.
     mu_c : `float`, optional: default = `None`
         The chemical potential for the colloid species (multiplied with
         the inverse temperature to make it's dimension 1). Just required
@@ -51,18 +51,18 @@ class LG3dAOHighl(LdftModel):
         is not required, as for those ``mu_fix`` is set `True`.
     v_ext_c : `numpy.ndarray`, optional: default=`None`
         An external potential for the colloids. Shape must be of the
-        same shape as choosen in ``size``. This class does not consider
+        same shape as chosen in ``size``. This class does not consider
         the possibility of sticky walls. Therefore the external
         potential of polymers is set zero by default.
     bound_cond : `string`, optional: default='periodic'
         The boundary condition. Supports 'periodic' for periodic
         boundary conditions and '11_if' for a 45° tilted system with
         respect to the lattice. The latter is for creating slab
-        interface with (11) orientation. If '11_if' is choosen then one
-        dimension has to be choosen twice as the other dimension in the
+        interface with (11) orientation. If '11_if' is chosen then one
+        dimension has to be chosen twice as the other dimension in the
         ``size`` parameter e.g. (64, 128). Default value is 'periodic'.
     r : `List` of `np.array`; Optional: default = `None`
-        Desity profile for all thre species arranged in a `List`. Choose
+        Density profile for all three species arranged in a `List`. Choose
         `None` in case you hand over the ``r_hist``-parameter or in case
         you do not want to set the variable yet.
     r_hist : `List` of `List` of `np.array`; Optional: default = `None`
@@ -76,10 +76,10 @@ class LG3dAOHighl(LdftModel):
     err_hist : `List` of `Tuple` of `Float`; Optional: default = `None`
         Contains the error at the picard-steps corresponding to the
         entries of `r_hist`. The entries are tuples containing an error
-        for every species. Use `None` if no history availabe.
+        for every species. Use `None` if no history available.
     it_hist : `List`; Optional: default = `None`
-        List of the picardsteps corresponding to the density profiles at
-        the ``r_hist``-parameter. Use `None` if no history availabe.
+        List of the picard steps corresponding to the density profiles at
+        the ``r_hist``-parameter. Use `None` if no history available.
         Note: if ``r_hist`` is given then also this argument should be
         assigned with an appropriate list.
     """
@@ -113,16 +113,16 @@ class LG3dAOHighl(LdftModel):
 
     ####################################################################
     #Protected descriptors for internal use. These are for a more
-    #convenient adresseing of the species specific instance variables.
+    #convenient addressing of the species specific instance variables.
     #Important to notice: do not override the protected variables of the
     #super class LdftModel. Otherwise the functionality of the instance
-    #methodes in LdftModel can not be secured.
+    #methods in LdftModel can not be secured.
     ####################################################################
 
     @property
     def _mu_c(self):
-        """The chemical potential of the coloid species (times the
-        inverse temperatue to make its dimension 1)
+        """The chemical potential of the colloid species (times the
+        inverse temperature to make its dimension 1)
         (`float`, read-only).
         """
         return self._mu[0]
@@ -130,7 +130,7 @@ class LG3dAOHighl(LdftModel):
     @property
     def _mu_pc1(self):
         """The chemical potential of the polymer species in x-direction
-        (times the inverse temperatue to make its dimension 1).
+        (times the inverse temperature to make its dimension 1).
         (`float`, read-only)
         """
         return self._mu[1]
@@ -138,7 +138,7 @@ class LG3dAOHighl(LdftModel):
     @property
     def _mu_pc2(self):
         """The chemical potential of the polymer species in y-direction
-        (times the inverse temperatue to make its dimension 1).
+        (times the inverse temperature to make its dimension 1).
         (`float`, read-only)
         """
         return self._mu[2]
@@ -146,14 +146,14 @@ class LG3dAOHighl(LdftModel):
     @property
     def _mu_pc3(self):
         """The chemical potential of the polymer species in z-direction
-        (times the inverse temperatue to make its dimension 1).
+        (times the inverse temperature to make its dimension 1).
         (`float`, read-only)
         """
         return self._mu[3]
     
     @property
     def _dens_c(self):
-        """The average density of the coloid species (`float`,
+        """The average density of the colloid species (`float`,
         read-only).
         """
         return self._dens[0]
@@ -209,7 +209,7 @@ class LG3dAOHighl(LdftModel):
     
     @property
     def _r_c(self):
-        """The density profile of the coloid species. (`numpy.ndarray`,
+        """The density profile of the colloid species. (`numpy.ndarray`,
         read-only)
         """
         return self._r[0]
@@ -238,13 +238,13 @@ class LG3dAOHighl(LdftModel):
 
     ####################################################################
     #Public descriptors. These are for the user to access the variables
-    #of intrest. Some are already defined in the super class. Some of
+    #of interest. Some are already defined in the super class. Some of
     #them are reused, but others are overwritten.
     ####################################################################
 
     @property
     def epsi(self):
-        """The attraction strengs between the lattice-particles of the
+        """The attraction strength between the lattice-particles of the
         lattice gas. (`Float`, read-only)
         """
         return self.translate_mu_pc_to_epsi(self._mu_pc1)
@@ -252,7 +252,7 @@ class LG3dAOHighl(LdftModel):
     @property
     def mu_c(self):
         """The chemical potential of the colloids (times the inverse
-        temperatue to make its dimension 1). It is equals the chemical
+        temperature to make its dimension 1). It is equals the chemical
         potential of the particles of the lattice gas. (`float`)
         """
         return self._mu[0]
@@ -312,7 +312,7 @@ class LG3dAOHighl(LdftModel):
     
     @property
     def mu_fix_c(self):
-        """Flag which determines wether the colloids (a.k. the particles
+        """Flag which determines whether the colloids (a.k. the particles
         of the lattice gas) are treated canonical (`False`) or grand
         canonical (`True`). (`Bool`)
         """
@@ -388,18 +388,18 @@ class LG3dAOHighl(LdftModel):
     @staticmethod
     def translate_epsi_to_mu_pc(epsi):
         """Maps the attraction strength of the lattice gas ``epsi`` to
-        the corresponding polymercluster chemical potential.
+        the corresponding polymer cluster chemical potential.
 
         Parameters
         ----------
         epsi : `float`
             The attraction strength (multiplied with the inverse
-            temperature to make the quantitiy dimensionless).
+            temperature to make the quantity dimensionless).
 
         Returns
         -------
         mu_pc : The chemical potential (multiplied with the inverse
-            temperature to make the quantitiy dimensionless). (`float`)
+            temperature to make the quantity dimensionless). (`float`)
 
         """
         mu_pc=np.log(np.exp(epsi)-1)
@@ -407,26 +407,26 @@ class LG3dAOHighl(LdftModel):
 
     @staticmethod
     def translate_mu_pc_to_epsi(mu_pc):
-        """Maps the polymercluster chemical potential to the attraction
+        """Maps the polymer cluster chemical potential to the attraction
         strength of the lattice gas ``epsi``.
 
         Parameters
         ----------
         mu_pc : `float`
             The polymer chemical potential (multiplied with the inverse
-            temperature to make the quantitiy dimensionless).
+            temperature to make the quantity dimensionless).
 
         Returns
         -------
         epsi : The attraction strength (multiplied with the inverse
-            temperature to make the quantitiy dimensionless). (`float`)
+            temperature to make the quantity dimensionless). (`float`)
 
         """
         epsi=np.log(np.exp(mu_pc)+1)
         return epsi
 
     ####################################################################
-    #The inhomogenious functional:
+    #The inhomogeneous functional:
     #In this section all the functions concerning the model specific
     #free energy functional are defined.
     ####################################################################
@@ -482,7 +482,7 @@ class LG3dAOHighl(LdftModel):
         a correction term accounting for the zero- and one-body
         interaction of the polymers (see description of the class). For
         getting the free energy of the lattice gas use ``cal_F_lg``,
-        which is the semigrand potential, where the polymer clusters are
+        which is the semi-grand potential, where the polymer clusters are
         treated grand canonically and the colloids canonically.
 
         Returns
@@ -513,7 +513,7 @@ class LG3dAOHighl(LdftModel):
 
     def cal_F_lg(self):
         """Calculates the free energy of the lattice gas. If
-        ``self.mu_fix==False`` this schould give the same result as the
+        ``self.mu_fix==False`` this should give the same result as the
         ``cal_semi_Om``-function.
 
         Returns
@@ -555,20 +555,20 @@ class LG3dAOHighl(LdftModel):
         return mu_c_ex, mu_pc1_ex, mu_pc2_ex, mu_pc3_ex
 
     ####################################################################
-    #The homogenious methodes:
-    #The following section contains all the methodes concerning the bulk
+    #The homogeneous methods:
+    #The following section contains all the methods concerning the bulk
     #properties of the system.
     ####################################################################
 
     @classmethod
     def _cal_bulk_r_pc(cls, r_c, epsi):
         """Calculates the bulk polymer cluster density in dependence of
-        the the coloid density and the choosen attraction strength
+        the colloid density and the chosen attraction strength
 
         Parameters
         ----------
         r_c : `float` or `np.ndarray`
-            The coloid density.
+            The colloid density.
         epsi : `float`
             Attraction strength (times inverse temperature).
 
@@ -587,13 +587,13 @@ class LG3dAOHighl(LdftModel):
     @classmethod
     def _cal_bulk_dr_pc(cls, r_c, epsi):
         """Calculates the derivative of the bulk polymer cluster density
-        with respect to the coloidal density in dependence of
-        the the coloid density and the chosen attraction strength
+        with respect to the colloidal density in dependence of
+        the colloid density and the chosen attraction strength
 
         Parameters
         ----------
         r_c : `float` or `np.ndarray`
-            The coloid density.
+            The colloid density.
         epsi : `float`
             Attraction strength (times inverse temperature).
 
@@ -615,7 +615,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `Float` or `np.ndarray`
-            The coloidal density.
+            The colloidal density.
         epsi : `Float`
             Attraction strength (times inverse temperature)
 
@@ -639,7 +639,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `Float` or `np.ndarray`
-            The coloidal density.
+            The colloidal density.
         epsi : `Float`
             Attraction strength
 
@@ -666,7 +666,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            Coloid density
+            Colloid density
         r_pc : `float`
             Polymer cluster density
 
@@ -686,7 +686,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            Coloid density
+            Colloid density
         r_pc : `float`
             Polymer cluster density
 
@@ -704,7 +704,7 @@ class LG3dAOHighl(LdftModel):
     def cal_bulk_f_lg(cls, r_c, epsi):
         """Calculates the free energy density of the bulk lattice gas
         under given density. (The function is the same as in
-        ``cal_F_lg`` but simplified for bulk sytems.)
+        ``cal_F_lg`` but simplified for bulk systems.)
 
         Parameters
         ----------
@@ -730,18 +730,18 @@ class LG3dAOHighl(LdftModel):
     @classmethod
     def cal_bulk_om_lg(cls, r, epsi):
         """Calculates the grand potential density for a bulk lattice gas
-        under given densitie.
+        under given density.
 
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
         Returns
         -------
-        om : `Float` 
+        om : `Float`
             The grand potential density
         """
         f = cls.cal_bulk_f_lg(r, epsi)
@@ -757,7 +757,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
@@ -778,7 +778,7 @@ class LG3dAOHighl(LdftModel):
         Parameters
         ----------
         r_c : `float`
-            The coloid density of the system
+            The colloid density of the system
         *args:
             First argument: Attraction strength (times inverse
             temperature). (`float`)
@@ -807,12 +807,12 @@ class LG3dAOHighl(LdftModel):
         mu : `Float`
             The chemical potential of the lattice gas.
         epsi : `Float`
-            The attraction strengs (times inverse temperatue).
+            The attraction strength (times inverse temperature).
 
         Returns
         -------
         r_coex : `Tuple`
-            The coexisting densities arrangend in a tuple of the shape 
+            The coexisting densities arranged in a tuple of the shape
             (vapour_dens, liquid_dens)
         """
         r_coex = op.fsolve(cls._cal_difMu,\
@@ -822,8 +822,8 @@ class LG3dAOHighl(LdftModel):
 
 
     ####################################################################
-    #In the following section the abc-methodes concerning the surface
-    #prperties of the mother class are overridden.
+    #In the following section the abc-methods concerning the surface
+    #properties of the mother class are overridden.
     ####################################################################
 
     def _cal_p(self, dens):

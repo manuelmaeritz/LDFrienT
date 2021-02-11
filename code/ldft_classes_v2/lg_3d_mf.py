@@ -7,8 +7,8 @@ from functools import reduce
 class LG3dMf(LdftModel):
     """This class describes a single component lattice gas in 3d with
     sticky next neighbour attractions on a simple cubic lattice. The
-    description is done within the framework of meanfield theory. The
-    class inheritates from the interface-class ``LdftModel``.
+    description is done within the framework of mean field theory. The
+    class inherits from the interface-class ``LdftModel``.
     
     Parameters
     ----------
@@ -29,16 +29,16 @@ class LG3dMf(LdftModel):
         ``mu_fix``==`False`.
     v_ext : `numpy.ndarray`, optional: default=`None`
         An external potential. Shape must be of the same shape as
-        choosen in ``size``.
+        chosen in ``size``.
     bound_cond : `string`, optional: default='periodic'
         The boundary condition. Supports 'periodic' for periodic
         boundary conditions and '11_if' for a 45° tilted system with
         respect to the lattice. The latter is for creating slab
-        interface with (11) orientation. If '11_if' is choosen then one
-        dimension has to be choosen twice as the other dimension in the
+        interface with (11) orientation. If '11_if' is chosen then one
+        dimension has to be chosen twice as the other dimension in the
         ``size`` parameter e.g. (64, 128). Default value is 'periodic'.
     r : `np.array`; Optional: default = `None`
-        Desity profile. choose `None` in case you hand over the
+        Density profile. choose `None` in case you hand over the
         ``r_hist``-parameter or in case you do not want to set the
         variable yet.
     r_hist : `List`; Optional: default = `None`
@@ -52,10 +52,10 @@ class LG3dMf(LdftModel):
     err_hist : `List`;  Optional: default = `None`
         Contains the error at the picard-steps corresponding to the
         entries of `r_hist`. The entries are lists containing an error
-        for every species. Use `None` if no history availabe.
+        for every species. Use `None` if no history available.
     it_hist : `List`; Optional: default = `None`
-        List of the picardsteps corresponding to the density profiles at
-        the ``r_hist``-parameter. Use `None` if no history availabe.
+        List of the picard steps corresponding to the density profiles at
+        the ``r_hist``-parameter. Use `None` if no history available.
         Note: if ``r_hist`` is given then also this argument should be
         assigned with an appropriate list.
     """
@@ -93,13 +93,13 @@ class LG3dMf(LdftModel):
 
     ####################################################################
     #In the following some properties are overwritten. As there is just
-    #one species arround in this model the lists summarizing a certain
-    #property for different species are not neccesary here. Therefore it
+    #one species around in this model the lists summarizing a certain
+    #property for different species are not necessary here. Therefore it
     #is more convenient to work without the lists of species. The
     #following properties account for this. But one must not overwrite
     #the instance variables of the LdftModel class. Internally the code
     #still works with the lists. Overwriting of instance variables might
-    #cause errors. 
+    #cause errors.
     ####################################################################
 
     @property
@@ -114,7 +114,7 @@ class LG3dMf(LdftModel):
         ``_mu``. See its description for further details. (`Float`)
         """
         return self._mu[0]
-    
+
     @mu.setter
     def mu(self, mu):
         self._mu[0] = mu
@@ -129,10 +129,10 @@ class LG3dMf(LdftModel):
     @dens.setter
     def dens(self, dens):
         self._dens[0] = dens
-    
+
     @LdftModel.mu_fix.getter
     def mu_fix(self):
-        """Flag indecating whether the system is treated canonical or
+        """Flag indicating whether the system is treated canonical or
         grand canonical. It is the (only) entry of the list ``_mu_fix``.
         See its description for further details. (`Bool`)
         """
@@ -156,7 +156,7 @@ class LG3dMf(LdftModel):
 
     @LdftModel.r.getter
     def r(self):
-        """Curent density profile. It is the (only) entry of the list
+        """Current density profile. It is the (only) entry of the list
         ``_r``. See its description for further details. (`np.array`)
         """
         return self._r[0]
@@ -168,21 +168,21 @@ class LG3dMf(LdftModel):
     @LdftModel.r_hist.getter
     def r_hist(self):
         """Iteration history of the density profile. It is the same list
-        as ``_r_hist`` but with the density profiles not wraped in
+        as ``_r_hist`` but with the density profiles not wrapped in
         another list. (`List`, read-only)
         """
         r_hist = [r[0] for r in self._r_hist]
         return r_hist
-    
+
     @LdftModel.err_hist.getter
     def err_hist(self):
         """Iteration history of the picard-error. It is the same list as
-        ``_err_hist`` but with the density profiles not wraped in
+        ``_err_hist`` but with the density profiles not wrapped in
         another list. (`List`, read-only)
         """
         err_hist =[err[0] for err in self._err_hist]
         return err_hist
-    
+
     ####################################################################
     #In the following we define all the models necessary for overwriting
     #the abstract method ``cal_F`` and ``cal_mu_ex`` and eventually
@@ -190,7 +190,7 @@ class LG3dMf(LdftModel):
     ####################################################################
 
     def cal_F_id(self):
-        """Calculates the ideal part of the free energy on the curent
+        """Calculates the ideal part of the free energy on the current
         density profile ``_r``.
 
         Returns
@@ -203,11 +203,11 @@ class LG3dMf(LdftModel):
 
     def cal_F_hr(self):
         """Calculates the hard rod part of the excess free energy on the
-        curent density profile ``_r``.
+        current density profile ``_r``.
 
         Returns
         -------
-        Hard rod part of the exess free energy : `Float`
+        Hard rod part of the excess free energy : `Float`
         """
         r = self._r[0]
         F_hr = np.sum(r+(1-r)*np.log(1-r))
@@ -215,7 +215,7 @@ class LG3dMf(LdftModel):
 
     def cal_F_sa(self):
         """Calculates the sticky attraction part of the excess free
-        energy on the curent density profile ``_r``.
+        energy on the current density profile ``_r``.
 
         Returns
         -------
@@ -280,8 +280,8 @@ class LG3dMf(LdftModel):
     @classmethod
     def cal_bulk_mu(cls, dens, epsi):
         '''Calculates the chemical potential of a bulk system under
-        given denstiy.
-        
+        given density.
+
         Parameters
         ----------
         dens : `float`
@@ -302,12 +302,12 @@ class LG3dMf(LdftModel):
     @classmethod
     def cal_bulk_om(cls, r, epsi):
         """Calculates the grand potential density for a bulk lattice gas
-        under given densitie.
+        under given densities.
 
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
@@ -329,7 +329,7 @@ class LG3dMf(LdftModel):
         Parameters
         ----------
         r : `float` or `np.ndarray`
-            The denstity.
+            The density.
         epsi : `float`
             The attraction strength (times inverse temperature).
 
@@ -343,7 +343,7 @@ class LG3dMf(LdftModel):
     @classmethod
     def _cal_difMu(cls, rho, *args):
         """Calculates the difference between a certain chemical
-        potentail and the chemical potential belonging to a certain
+        potential and the chemical potential belonging to a certain
         density. This is a help-function for the function
         ``cal_bulk_coex_dens``.
 
@@ -359,16 +359,16 @@ class LG3dMf(LdftModel):
             chemical potential for at density r_c should be compared to.
             (`float`)
 
-	Returns
-	-------
-	difMu : `float`
-	    The difference between the two chemical potentials
+        Returns
+        -------
+        difMu : `float`
+            The difference between the two chemical potentials
         """
         epsi = args[0]
         mu = args[1]
         mu_rho = cls.cal_bulk_mu(rho, epsi)
         return mu_rho-mu
-    
+
     @classmethod
     def cal_bulk_coex_dens(cls, mu, epsi):
         """Calculates the coexisting densities of a bulk system lattice
@@ -379,22 +379,22 @@ class LG3dMf(LdftModel):
         mu : `Float`
             The chemical potential of the lattice gas.
         epsi : `Float`
-            The attraction strengs (times inverse temperatue).
+            The attraction strength (times inverse temperature).
 
         Returns
         -------
         r_coex : `Tuple`
-            The coexisting densities arrangend in a tuple of the shape
+            The coexisting densities arranged in a tuple of the shape
             (vapour_dens, liquid_dens)
         """
         r_coex = op.fsolve(cls._cal_difMu,\
                 np.array([0.01, 0.5, 0.99]), args=(epsi, mu))
         r_coex = (r_coex[0], r_coex[2])
         return r_coex
-    
+
     ####################################################################
     #In the following section the abc-methods concerning the surface
-    #properties of the mother class are overriden
+    #properties of the mother class are overridden
     ####################################################################
 
     def _cal_p(self, dens):
