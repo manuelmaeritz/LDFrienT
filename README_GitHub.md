@@ -41,9 +41,9 @@ The notebook **generator-testsheet.ipynb** was for testing the functions provide
   - LG2dAOHighl-testsheet.ipynb.............................. Test or tutorial for the ``LG2dAOHighl``-class
   - LG2dMeanField-testsheet.ipynb........................... Test or tutorial for the ``LG2dMeanField``-class
   - generator-interface.ipynb...................................... "Interface"-notebook for ``generator.py``-modul
-  - generator-testsheet.ipynb...................................... Test or tutorial for the ``generator.py``-modul
-  - generator.py........................................................... contains functions to produce samples
-- **samples**........................................................................ some exemplary samples produce by the code
+  - generator-testsheet.ipynb..................................... Test or tutorial for the ``generator.py``-modul
+  - generator.py.......................................................... contains functions to produce samples
+- **samples**...................................................................... some exemplary samples produce by the code
 - .gitignore
 - License
 - README_GitHub......................................................... This read-me file
