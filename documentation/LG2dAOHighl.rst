@@ -1,6 +1,8 @@
 Documentation on LG2dAOHigh
 ============================
+
 *class* ``ldft_classes_v2.lg_2d_highl.LG2dAOHighl(self, size, epsi, mu_fix_c=False, mu_c=None, dens_c=None, v_ext_c=None, bound_cond='periodic', r=None, r_hist=None, err_hist=None, it_hist=None)`` 
+
 Base: ``ldft_model.LdftModel`` 
 
 This class describes a single component lattice gas in 2d with
@@ -25,6 +27,7 @@ species in the lattice gas.
 
 Parameters
 ----------
+
 size : `tuple` of `int`
     Shape of the systems simulation box. Expects a `Tuple` of two
     integers, each for one dimensional axis.
@@ -83,6 +86,7 @@ it_hist : `List`; Optional: default = `None`
 
 Attributes
 ----------
+
 _size : `Tuple`
     Here the ``size``-parameter is stored. See it's description for
     further detail.
@@ -159,8 +163,10 @@ _dim : `integer`
 
 Properties
 ----------
+
 Properties for external use
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 size : `Tuple`, read-only
     Accesses the ``_size``-attribute 
 
@@ -297,7 +303,8 @@ _r_pc2(self) : `numpy.ndarray`, read-only
     The density profile of the polymer species in y-direction.
 
 Methods
---------
+-------
+
 ``__init__(self, size, epsi, mu_fix_c=False, mu_c=None, dens_c=None, v_ext_c=None, bound_cond='periodic', r=None, r_hist=None, err_hist=None, it_hist=None)``
 
     **Parameters**
@@ -364,6 +371,7 @@ Methods
 
 Methods for external use
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
 Those methodes are public and may be called by the user of this class.
 
 Translating the lattice gas to the AO-model
@@ -1042,6 +1050,7 @@ Methods calculating interface properties
 
 Methods for internal use
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
 This methods are private and not supposed to be called from external. They are help routines which are called by other methodes.
 
 Help-methods for calculating the functional
