@@ -30,5 +30,23 @@ The notebooks **LG2dAOHighl-testsheet.ipynb** and **LG2dMeanField-testsheed.ipyn
 
 The notebook **generator-testsheet.ipynb** was for testing the functions provided in **generator.py**, though serve as a tutorial to this module as well. Moreover, there is a notebook **generator-interface.ipynb**, which can be used, if one does not want to call the functions in **generator.py** from the terminal.
 
+## Content and file structure
+- **code**.............................................................................This folder holds all the code
+  - **ldft_classes_v2** 
+    - ldft_model.py................................................. contains ``LdftModel``-class (abstract class serving as LDFT framework)
+    - lg_2d_highl.py................................................ contains ``LG2dAOHighl``-class (two-dimensional lattice gas in Highlander approximation)
+    - lg_2d_mf.py................................................... contains ``LG2dMf``-class (two-dimensional lattice gas in mean field approximation)
+    - lg_3d_higl.py................................................. contains ``LG3dAOHighl``-class (three-dimensional lattice gas in Highlander approximation)
+    - lg_3d_mf.py................................................... contains ``LG3dMf``-class (three-dimensional lattice gas in mean field approximation)
+  - LG2dAOHighl-testsheet.ipynb.............................. Test or tutorial for the ``LG2dAOHighl``-class
+  - LG2dMeanField-testsheet.ipynb........................... Test or tutorial for the ``LG2dMeanField``-class
+  - generator-interface.ipynb...................................... "Interface"-notebook for ``generator.py``-modul
+  - generator-testsheet.ipynb...................................... Test or tutorial for the ``generator.py``-modul
+  - generator.py........................................................... contains functions to produce samples
+- **samples**........................................................................ some exemplary samples produce by the code
+- .gitignore
+- License
+- README_GitHub......................................................... This read-me file
+
 ## Documentation
 
