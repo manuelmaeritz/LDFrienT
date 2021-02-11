@@ -1259,8 +1259,8 @@ Help-methods for calculating bulk properties
     epsi : `float`
         Attraction strength (times inverse temperature).
 
-    Returns
-    -------
+    **Returns**
+    
     dr_pc : `float` or `np.ndarray`
         The derivative of the polymer cluster density.
 
