@@ -292,9 +292,8 @@ Methods for external use
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Those methodes are public and may be called by the user of this class.
 
-Abstract methods
-''''''''''''''''
-These methodes need to be implemented by classes which inherit from this class.
+Methods concerning the Functional
+'''''''''''''''''''''''''''''''''
 
 *abstractmethod* ``cal_F(self)``
 
@@ -305,6 +304,30 @@ These methodes need to be implemented by classes which inherit from this class.
     **Returns**
 
     The free energy : `Float`
+    
+----
+    
+``cal_Om(self)``
+
+    Calculates the grand potential of the models curent density
+    profile (meaning every species treated grand canonicaly, as if
+    ``_mu_fix`` is ``True`` for every species).
+
+    **Returns**
+
+    The grand potential : `Float`
+    
+----
+
+``cal_semi_Om(self)``
+
+    Calculates the semi grand potential of the models current
+    density profile (meaning every species with ``_mu_fix==True``
+    is treated grand canonically and every other canonical).
+
+    **Returns**
+
+    The semi-grand potential : `Float`
 
 ----
 
@@ -317,7 +340,680 @@ These methodes need to be implemented by classes which inherit from this class.
 
     The excess chemical potential : `List`
 
+Methods concerning the minimization
+'''''''''''''''''''''''''''''''''''
+
+``make_picard_iteration(self, alpha, it_steps, checkp_method, min_err=None)``
+
+    Calls ``it_steps`` times the method ``_make_picard_update``
+    with the update parameter ``alpha``. The iteration can be
+    prematurely aborted when the iteration error fall below a minimal
+    error ``min_err``. When ``self._it_counter`` reaches certain
+    values (checkpoints) the current profile is appended to the
+    ``self._r_hist``-attribute by calling ``_append_hist``. The next
+    checkpoint is calculated by ``_set_new_checkp`` according to the
+    parameter ``checkp_method``. Before exiting the function the last
+    profile is also appended to ``_err_hist`` with ``_append_hist``.
+
+    **Parameters**
+
+    alpha : `Float`
+        Value between 0 and 1. Determines how 'fast' the iteration is
+        done (The higher, the faster). In case of to high ``alpha``
+        the danger of divergence arises.
+    it_steps : `Int`
+        Number of iteration steps
+    checkp_method : `String`
+        Determines in which intervals the profile should be
+        appended to the ``_r_hist``-attribute. Possible values:
+        integer number, 'exp#', 'dec#' where # needs to be replaced
+        by a number. See description of ``_set_new_checkp``.
+    min_err : `Float`
+        Determines at which error the iteration can be aborted
+        prematurely.
+        
+Methods for creating the initial density profile
+''''''''''''''''''''''''''''''''''''''''''''''''
+
+``create_init_profile(self, dens=None, shape=None)``
+
+    Creates an initial density profile for each species the
+    picard iteration can start with. A list of average density of
+    each species is handed over via the ``dens``-parameter.
+    Additionally a nucleus can be placed in the density profile of
+    each species, the shape of which determined by the
+    ``shape``-parameter. Calls the function ``self.set_r`` to set
+    the density profile to the variable ``_r``. The Nucleus further
+    satisfies the boundary condition ``_bound_cond``
+
+    **Parameters**
+
+    dens : `List`
+        Determines the average density of each species.
+    shape : `List` of `Tuples`
+        The tuples determines the shape of the nucleus for each
+        species. E.g. (3, 4) for a 2d-system with a nucleus of
+        expand 3x4.
+        
 ----
+
+``return_hom_densProfile(self, dens)``
+
+    Returns a homogeneous one species density profile with
+    density according to the parameter ``dens``. The shape of which
+    is determined by the `_size`-instance variable.
+
+    **Parameters**
+
+    dens : `Float`
+        Density of the homogeneous profile.
+
+    **Returns**
+
+    Profile : `np.array`
+        The resulting density profile.
+
+----
+
+``return_nuc_densProfile(self, dens, shape)``
+
+    Returns a one species density profile with average density
+    according to the ``dens``-parameter and a nucleus of shape
+    determined by the ``shape``-parameter. The nucleus further
+    satisfies the boundary condition ``_bound_cond``.
+
+    **Parameters**
+
+    dens : `Float`
+        Average density of the profile.
+    shape : `Tuple`
+        Determines the shape of the nucleus. E.g. (3, 4) for a
+        2d-system with a nucleus of expand 3x4.
+
+    **Returns**
+
+    Profile :`np.array`
+        The density resulting profile.
+
+Methodes for setting some attributes
+''''''''''''''''''''''''''''''''''''''
+
+``set_r(self, r)``
+
+    This function is used for assigning a new initial profile
+    ``r`` to the instance variable ``_r``. Therefor the
+    ``_it_counter`` is being reset to '0' and the history
+    attributes ``_r_hist``, ``_it_hist``, ``_err_hist`` are updated.
+
+    **Parameters**
+
+    r : `List` of `numpy.array`
+        New initial density profile for each species.
+
+``set_hist(self, r_hist, it_hist, err_hist)``
+
+    This function is to manually set the internal history
+    variables ``_r_hist``, ``_it_hist`` and ``_err_hist``. The last
+    entry of the ``r_hist``-parameter is assigned to the instance
+    variable ``_r``, which is the current density profile.
+
+    **Parameters**
+
+    r_hist : `list` of `list` of `numpy.ndarray`
+        Iteration history of the density profile. This parameter
+        should be of the following format [profile_0, profile_1,...]
+        where ``profile_i`` is the profile of the i'th iteration
+        step and has the format [r_1, r_2, ...], where the entries
+        are the profile of the corresponding species.
+    it_hist : `list` of `int`
+        This parameter lists the corresponding iteration steps of
+        the ``r_hist`` parameter.
+    err_hist : `list` of `list` of `float`
+        History of the picard error. It is of the following format:
+        [err_0, err_1,...] where err_i is the error of the i'th
+        iteration step and is a list itself, with an error entry for
+        every species.
+ 
+Methodes for saving the system
+''''''''''''''''''''''''''''''
+
+``save_syst(self, path, filename)``
+
+    Uses ``pickle.dump`` to save the instance variables of a
+    system.
+
+    **Parameters**
+
+    path : `String`
+        Directory in which the system should be stored (needs to be
+        a absolute path)
+    filename : `String`
+        The filename under which the system should be stored.
+        
+----
+
+*classmethod* ``load_syst(cls, path, filename)``
+
+    Uses ``pickle.load`` to load a system. It is strongly
+    recommended to override this method in the inherited classes,
+    as the returned system might be of an outdated type! A typecast
+    should be implemented!
+
+    **Parameters**
+
+    path : `String`
+        Directory in which the system is stored which one want's to
+        load (needs to be a absolute path)
+    filename: `String`
+        The filename under which the system of interest is stored.
+
+    **Returns**
+
+    Model : `LdftModel`
+        The returned model probably has the type of an inherited
+        class. It might also be the class of an outdated type.
+
+Methods for representation of some properties
+'''''''''''''''''''''''''''''''''''''''''''''
+
+``print_error(self)``
+
+    Returns a figure where the error history ``_err_hist`` is
+    plotted.
+
+    **Returns**
+
+    Figure : `matplotlib.pyplot.figure`
+        Plotted error history.
+
+----
+
+``print_2d_profile(self)``
+
+    Creates a figure where the current profile is plotted. This
+    function is just for 2d-systems.
+
+    **Returns**
+
+    Figure : `matplotlib.pyplot.figure`
+        Plotted profile
+
+----
+
+``print_2d_profile2(self)``
+
+    Creates a figure where the current profile is plotted. This
+    function is just for 2d-systems.
+
+    **Returns**
+
+    Figure : `matplotlib.pyplot.figure`
+        Plotted profile
+
+----
+
+``print_2d_hist(self, species=0, rows=10, idx_list=None)``
+
+    Creates a figure where the history ``_r_hist`` is plotted.
+    Just one species can be plotted at the same time. Not the total
+    history is plotted but certain iteration steps.
+
+    **Parameters**
+
+    species : `int`; optional: default = 0
+        The species, the iteration-history of which shall be
+        plotted.
+    rows : `int`; optional: default = 10
+        Number of iteration-steps which shall be plotted. This
+        parameter is just be considered when the parameter
+        ``idx_list`` is `None`.
+    idx_list : `List`; optional: default = None
+        If `None`, the iteration steps which are plotted are chosen
+        equidistant in the ``_it_hist``-list. Alternatively one can
+        choose ones own list. This list, however, does not contain
+        the iteration-steps which shall be plotted, but the indices
+        of those.
+
+    **Returns**
+
+    Figure : `matplotlib.pyplot.figure`
+        Plotted history
+        
+----
+
+``print_2d_hist2(self, species=0, rows=10, idx_list=None)``
+
+    Creates a figure where the history ``_r_hist`` is plotted.
+    Just one species can be plotted at the same time. Not the total
+    history is plotted but certain iteration steps.
+
+    **Parameters**
+
+    species : `int`; optional: default = 0
+        The species, the iteration-history of which shall be
+        plotted.
+    rows : `int`; optional: default = 10
+        Number of iteration-steps which shall be plotted. This
+        parameter is just be considered when the parameter
+        ``idx_list`` is `None`.
+    idx_list : `List`; optional: default = None
+        If `None`, the iteration steps which are plotted are chosen
+        equidistant in the ``_it_hist``-list. Alternatively one can
+        choose ones own list. This list, however, does not contain
+        the iteration-steps which shall be plotted, but the indices
+        of those.
+
+    **Returns**
+
+    Figure : `matplotlib.pyplot.figure`
+        Plotted history
+
+Methods calculating interface properties
+''''''''''''''''''''''''''''''''''''''''
+
+``cal_p_vap(self)``
+
+    Calculates the coexisting pressures under the current
+    parameters of the system (``_mu``, ``_dens``) and returns the
+    vapour pressure.
+
+    **Returns**
+
+    Vapour pressure : `Float`
+        The vapour pressure of the current system
+        
+----
+
+``cal_p_liq(self)``
+
+    Calculates the coexisting pressures under the current
+    parameters of the system (``_mu``, ``_dens``) and returns the
+    liquid pressure.
+
+    **Returns**
+
+    Liquid pressure : `Float`
+        The vapour pressure of the current system
+        
+----
+
+``det_intface_shape(self)``
+
+    Determines the shape of the interface of the current
+    configuration. It requires the inhomogeneities to be centered in
+    the system.
+
+    **Returns**
+
+    Shape : `String`
+        The shape of the interface: 'Droplet', 'Cylinder', 'Slab',
+        'Homogeneous'
+        
+----
+
+``cal_del_Om(self)``
+
+    Calculates the delta between the current grand potential and
+    the one by a homogeneous system of (oversaturated) vapor with the
+    same chemical potential as the current system.
+
+    **Returns**
+
+    delta Omega : `Float`
+        Delta of the grand potential
+        
+----
+
+``cal_R_s(self)``
+
+    Calculates the radius of surface of tension. In case of a
+    Cylinder configuration in three dimensions, the cylinder has to
+    point in the 0th axis of the density profile ``self._r``.
+
+    **Returns**
+
+    Radius of s.o.t. : `Float`
+        Radius of surface of tension
+
+----
+
+``cal_R_em(self, em_species=0)``
+
+    Calculates the equimolar radius for the species given by
+    ``em_species``. In case of cylinder configurations in three
+    dimensions the cylinder has to point in the 0th axis of the
+    density profile ``self._r``. This function does only work
+    properly, if a droplet/cylinder is embedded in a supersaturated
+    vapour. For configurations of bubbles or vapour cylinders
+    embedded in liquid, the result will be wrong.
+
+    **Parameters**
+
+    em_species : `Int`; Optional: default=0
+        Decides for which species the equimolar radius should
+        be calculated
+
+    **Returns**
+
+    equimolar radius : `Float`
+        Radius or the equimolar surface of a specific species.
+
+----
+
+``cal_gamma_R(self, R)``
+
+    Calculates the surface tension for spheres/circles in 3d/2d of
+    radius ``R``. In case of cylinder configurations in three
+    dimensions the cylinder has to point in the 0th axis of the
+    density profile ``self._r``.
+
+    **Parameters**
+
+    R : `Float`
+        Radius at which the surface tension should be calculated
+
+    **Returns**
+
+    surface tension : `Float`
+        surface tension for radius R.
+
+----
+
+``cal_gamma_s(self)``
+
+    Calculates the surface tension for spheres/circles in 3d/2d at
+    the surface of tensions. In case of cylinder configurations in
+    three dimensions the cylinder has to point in the 0th axis of the
+    density profile ``self._r``.
+
+    **Returns**
+
+    surface tension : `Float`
+        surface tension at the surface of tension.
+        
+----
+
+``cal_gamma_em(self, species=0)``
+
+    Calculates the surface tension for spheres/circles in 3d/2d at
+    the equimolar surface of a given species. In case of cylinder
+    configurations in three dimensions the cylinder has to point in
+    the 0th axis of the density profile ``self._r``. This function
+    does only work properly, if a droplet/cylinder is embedded in a
+    supersaturated vapour. For configurations of bubbles or vapour
+    cylinders embedded in liquid, the result will be wrong.
+
+    **Parameters**
+
+    species : `Int`; Optional: default=0
+        species for the equimolar surface
+
+    **Returns**
+
+    Surface tension : `Float`
+        Surface tension at the equimolar surface.
+        
+----
+
+``cal_adsorptionAtSurfOfTens(self, species=0)``
+
+    Calculates the adsorption for spheres/circles in 3d/2d at the
+    surface of tension for a given species. This function
+    does only work properly, if a droplet/cylinder is embedded in a
+    supersaturated vapour. For configurations of bubbles or vapour
+    cylinders embedded in liquid, the result will be wrong.
+
+    **Parameters**
+
+    species : `Int`; Optional: default =0
+        Species for which the adsorption should be calculated
+
+    **Returns**
+
+    Adsorption : `Tuple` of `Float`
+        First entry: Adsorbed particle number; Second entry:
+        adsorption.
+
+----
+
+``cal_gamma_inf(self, area)``
+
+    Calculates the surface tension of a flat interface. This
+    function can not determine the area of the surface itself.
+    Therefore it has to be passed as parameter.
+
+    **Parameters**
+
+    area : `float`
+        Area of the surface. There are always two surfaces
+        separating the liquid and the vapour. Meant is the area of
+        one of those
+
+    **returns:**
+        ``Tuple`` of ``Float``: First entry: Adsorbed particle
+        number; Second entry: Adsorption.
+        
+Methods for internal use
+^^^^^^^^^^^^^^^^^^^^^^^^
+This methods are private and not supposed to be called from external. They are help routines which are called by other methodes.
+ 
+Help-methods for calculating the functional
+'''''''''''''''''''''''''''''''''''''''''''
+
+*classmethod* ``_tilted_roll_3d(cls, array, steps, roll_axis, shift, shift_axis)``
+
+    Rolls a 3d numpy array in the manner of numpy.roll in
+    direction of ``roll_axis``, but with different boundary
+    conditions. The padding happens after the opposite surface, but
+    shifted. The shift corresponds to another rolling in direction of
+    a ``shift_axis`` unequal the ``shift_axis``.
+
+    **Parameters**
+
+    array : `numpy.array`
+        A 3d array which should be rolled.
+    steps : `int`
+        Number of steps of the rolling. Negative numbers for rolling
+        in negative direction.
+    roll_axis : `int`
+        Axis in which direction should be rolled. Possible values:
+        1, 2 and 3.
+    shift : `int`
+        Shift of the padding area with respect to the opposite
+        surface of the array.
+    shift_axis : `int`
+        Axis in which the shift should be done. Possible values: 1,
+        2 and 3 but not the same value as in ``roll_axis``.
+
+    **returns**
+
+    Rolled array : `numpy.array`
+    
+----
+
+*classmethod* ``_tilted_roll(cls, array, steps, roll_axis, shift, shift_axis)``
+
+    See the description of ``_tilted_roll_3d``. This function
+    makes the same but independent of the dimension of the array
+    which should be rolled.
+
+    **Parameters**
+
+    array : `numpy.array`
+        A 2d or 3d array which should be rolled.
+    steps : `int`
+        Number of steps of rolling. Negative numbers for rolling in
+        negative direction.
+    roll_axis : `int`
+        Axis in which direction should be rolled.
+    shift : `int`
+        Shift of the padding area with respect to the opposite
+        surface.
+    shift_axis : `int`
+        Axis in which the shift should be done.
+
+    **Returns**
+
+    The rolled array : `numpy.array`
+    
+----
+
+``_boundary_roll(self, r, steps, axis=0)``
+
+    Performs the rolling of a density profile under consideration
+    of the boundary condition in the class variable ``_bound_cond``.
+    If the boundary condition is not 'periodic', then the function
+    ``_tilted_roll`` is applied in an appropriate way to satisfy the
+    given boundary condition while rolling.
+
+    **Parameters**
+
+    r : `numpy.array`
+        The density profile which should be rolled.
+    steps : `int`
+        Number of steps of rolling. Negative numbers for rolling in
+        negative direction.
+    axis : `int`
+        Axis in which direction should be rolled.
+
+    **Returns**
+
+    The rolled array : `numpy.array`
+
+----
+
+``_cal_Phi_id(self)``
+
+    Calculates the ideal gas part of the free energy density.
+
+    **Returns**
+
+    Result : `numpy.ndarray`
+
+----
+
+*Staticmethod* ``_cal_Phi_0(x)``
+
+    Calculates the free energy density of a 0d-cavity depending
+    on the packing fraction.
+
+    **Parameters**
+
+    x : `float`
+        The packing fraction at which the 0d-cavity is evaluated
+
+    **Returns**
+
+    Result : `float`
+        The free energy density (Result is multiplied with the
+        inverse temperature to make its dimension 1).
+
+----
+
+*staticmethod* ``_cal_dPhi_0(x)``
+
+    Calculates the derivative of the free energy density of a
+    0d-cavity with respect of the packing fraction.
+
+    **Parameters**
+
+    x : `float`
+        The packing fraction
+
+    **Returns**
+
+    Result : `float`
+        Derivative of the free energy density (Result is multiplied
+        with the inverse temperature to make its dimension 1).
+
+----
+
+*staticmethod* ``_cal_d2Phi_0(x)``
+
+    Calculates the second derivative of the free energy density
+    of a 0d-cavity with respect of the packing fraction.
+
+    **Parameters**
+
+    x : `float`
+        The packing fraction
+
+    **Returns**
+
+    Result : `float`
+        Second derivative of the free energy density (Result is
+        multiplied with the inverse temperature to make its
+        dimension 1).
+
+Help-methods for the picard iteration
+'''''''''''''''''''''''''''''''''''''
+
+``_make_picard_update(self, alpha)``
+
+    Runs one Picard-Iteration. The instance variable ``_mu_fix``
+    decides whether the density or the chemical potential is to be
+    kept fixed during the iteration. When ``_mu_fix[i]``==`False` for
+    one species ``i``, the density is kept fix for this species and
+    the ``_mu``-attribute for the same is updated. In case of `True`,
+    the chemical potential ``_mu[i]`` is kept constant and the
+    density `_dens[i]` is going to be updated. The variable `_r` is
+    being updated, where the updated `r` is a superposition of the
+    old ``_r`` and the iterated ``r``. The `alpha`-parameter steers
+    the contribution of the iterated ``r`` to that superposition.
+    Finally 'self._it_counter'-Variable is increased by one.
+
+    **Parameters**
+
+    alpha : `Float`
+        Value between 0 and 1. Determines how 'fast' the iteration
+        is done (The higher, the faster). In case of to high
+        ``alpha`` the danger of divergence arises.
+
+    **Returns**
+
+    r : `List`
+        The iterated density profile.
+    error : `List`
+        The error for each species.
+        In case of divergence prints 'divergent!!!' and returns nothing.
+    
+----
+
+``_set_new_checkp(self, checkp_method)``
+
+    Calculates the next 'checkpoint' meaning an iteration number
+    at which the current density profile ``_r`` should be appended to
+    ``self._r_hist``. The next checkpoint is determined by the current
+    value of ``_it_counter`` and the method defined by the
+    parameter ``checkp_method``. 
+
+    **Parameters**
+
+    checkp_method : `String` or `Int`
+        Determines how the next checkpoint is calculated. Recommended
+        value: 'dec2'. It can take the following values:
+        integer value (for equidistant checkpoints with interval of
+        the integer); 'exp#' where # is to be replaced by a float
+        value (next checkpoint is last checkp to the power of float);
+        'dec#' where # is replaced by an integer (if e.g. #==3, the
+        checkpoints goes like this: 30, 60, 90, 100, 300, 600, 900,
+        1000, 3000, ...).
+
+    **Returns**
+
+    checkp : `Int`
+        The calculated next checkpoint
+        
+----
+        
+``_append_hist(self)``
+
+    Updates the history variables ``_r_hist``,``_it_hist``, by
+    appending the current density profile ``_r`` to ``_r_hist``
+    and appending ``_it_counter`` to ``_it_hist``.
+    
+Help-functions for the interface properties
+'''''''''''''''''''''''''''''''''''''''''''
 
 *abstractmethod* ``_cal_p(self, dens)``
 
@@ -347,635 +1043,3 @@ These methodes need to be implemented by classes which inherit from this class.
         The coexisting densities arranged in a List of Tuples. Each
         species corresponds to a Tuple of the form:
         (vapour_dens, liquid_dens)
-
-
-
-
-
-
-
-
-
-``cal_Om(self)``
-''''''''''''''''
-Calculates the grand potential of the models curent density
-profile (meaning every species treated grand canonicaly, as if
-``_mu_fix`` is ``True`` for every species).
-
-**Returns**
-
-The grand potential : `Float`
-
-``cal_semi_Om(self)``
-'''''''''''''''''''''
-Calculates the semi grand potential of the models current
-density profile (meaning every species with ``_mu_fix==True``
-is treated grand canonically and every other canonical).
-
-**Returns**
-
-The semi-grand potential : `Float`
-
-
-
-
-*classmethod* ``_tilted_roll_3d(cls, array, steps, roll_axis, shift, shift_axis)``
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Rolls a 3d numpy array in the manner of numpy.roll in
-direction of ``roll_axis``, but with different boundary
-conditions. The padding happens after the opposite surface, but
-shifted. The shift corresponds to another rolling in direction of
-a ``shift_axis`` unequal the ``shift_axis``.
-
-**Parameters**
-
-array : `numpy.array`
-    A 3d array which should be rolled.
-steps : `int`
-    Number of steps of the rolling. Negative numbers for rolling
-    in negative direction.
-roll_axis : `int`
-    Axis in which direction should be rolled. Possible values:
-    1, 2 and 3.
-shift : `int`
-    Shift of the padding area with respect to the opposite
-    surface of the array.
-shift_axis : `int`
-    Axis in which the shift should be done. Possible values: 1,
-    2 and 3 but not the same value as in ``roll_axis``.
-
-**returns**
-
-Rolled array : `numpy.array`
-
-*classmethod* ``_tilted_roll(cls, array, steps, roll_axis, shift, shift_axis)``
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-See the description of ``_tilted_roll_3d``. This function
-makes the same but independent of the dimension of the array
-which should be rolled.
-
-**Parameters**
-
-array : `numpy.array`
-    A 2d or 3d array which should be rolled.
-steps : `int`
-    Number of steps of rolling. Negative numbers for rolling in
-    negative direction.
-roll_axis : `int`
-    Axis in which direction should be rolled.
-shift : `int`
-    Shift of the padding area with respect to the opposite
-    surface.
-shift_axis : `int`
-    Axis in which the shift should be done.
-
-**Returns**
-
-The rolled array : `numpy.array`
-
-``_boundary_roll(self, r, steps, axis=0)``
-''''''''''''''''''''''''''''''''''''''''''
-Performs the rolling of a density profile under consideration
-of the boundary condition in the class variable ``_bound_cond``.
-If the boundary condition is not 'periodic', then the function
-``_tilted_roll`` is applied in an appropriate way to satisfy the
-given boundary condition while rolling.
-
-**Parameters**
-
-r : `numpy.array`
-    The density profile which should be rolled.
-steps : `int`
-    Number of steps of rolling. Negative numbers for rolling in
-    negative direction.
-axis : `int`
-    Axis in which direction should be rolled.
-
-**Returns**
-
-The rolled array : `numpy.array`
-
-
-``_cal_Phi_id(self)``
-'''''''''''''''''''''
-Calculates the ideal gas part of the free energy density.
-
-**Returns**
-
-Result : `numpy.ndarray`
-
-*Staticmethod* ``_cal_Phi_0(x)``
-''''''''''''''''''''''''''''''''
-Calculates the free energy density of a 0d-cavity depending
-on the packing fraction.
-
-**Parameters**
-
-x : `float`
-    The packing fraction at which the 0d-cavity is evaluated
-
-**Returns**
-
-Result : `float`
-    The free energy density (Result is multiplied with the
-    inverse temperature to make its dimension 1).
-
-*staticmethod* ``_cal_dPhi_0(x)``
-'''''''''''''''''''''''''''''''''''''
-Calculates the derivative of the free energy density of a
-0d-cavity with respect of the packing fraction.
-
-**Parameters**
-
-x : `float`
-    The packing fraction
-
-**Returns**
-
-Result : `float`
-    Derivative of the free energy density (Result is multiplied
-    with the inverse temperature to make its dimension 1).
-
-*staticmethod* ``_cal_d2Phi_0(x)``
-''''''''''''''''''''''''''''''''''
-Calculates the second derivative of the free energy density
-of a 0d-cavity with respect of the packing fraction.
-
-**Parameters**
-
-x : `float`
-    The packing fraction
-
-**Returns**
-
-Result : `float`
-    Second derivative of the free energy density (Result is
-    multiplied with the inverse temperature to make its
-    dimension 1).
-
-
-``_make_picard_update(self, alpha)``
-''''''''''''''''''''''''''''''''''''
-Runs one Picard-Iteration. The instance variable ``_mu_fix``
-decides whether the density or the chemical potential is to be
-kept fixed during the iteration. When ``_mu_fix[i]``==`False` for
-one species ``i``, the density is kept fix for this species and
-the ``_mu``-attribute for the same is updated. In case of `True`,
-the chemical potential ``_mu[i]`` is kept constant and the
-density `_dens[i]` is going to be updated. The variable `_r` is
-being updated, where the updated `r` is a superposition of the
-old ``_r`` and the iterated ``r``. The `alpha`-parameter steers
-the contribution of the iterated ``r`` to that superposition.
-Finally 'self._it_counter'-Variable is increased by one.
-
-**Parameters**
-
-alpha : `Float`
-    Value between 0 and 1. Determines how 'fast' the iteration
-    is done (The higher, the faster). In case of to high
-    ``alpha`` the danger of divergence arises.
-
-**Returns**
-
-r : `List`
-    The iterated density profile.
-error : `List`
-    The error for each species.
-    In case of divergence prints 'divergent!!!' and returns nothing.
-
-``make_picard_iteration(self, alpha, it_steps, checkp_method, min_err=None)``
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Calls ``it_steps`` times the method ``_make_picard_update``
-with the update parameter ``alpha``. The iteration can be
-prematurely aborted when the iteration error fall below a minimal
-error ``min_err``. When ``self._it_counter`` reaches certain
-values (checkpoints) the current profile is appended to the
-``self._r_hist``-attribute by calling ``_append_hist``. The next
-checkpoint is calculated by ``_set_new_checkp`` according to the
-parameter ``checkp_method``. Before exiting the function the last
-profile is also appended to ``_err_hist`` with ``_append_hist``.
-
-**Parameters**
-
-alpha : `Float`
-    Value between 0 and 1. Determines how 'fast' the iteration is
-    done (The higher, the faster). In case of to high ``alpha``
-    the danger of divergence arises.
-it_steps : `Int`
-    Number of iteration steps
-checkp_method : `String`
-    Determines in which intervals the profile should be
-    appended to the ``_r_hist``-attribute. Possible values:
-    integer number, 'exp#', 'dec#' where # needs to be replaced
-    by a number. See description of ``_set_new_checkp``.
-min_err : `Float`
-    Determines at which error the iteration can be aborted
-    prematurely.
-
-``_set_new_checkp(self, checkp_method)``
-''''''''''''''''''''''''''''''''''''''''
-Calculates the next 'checkpoint' meaning an iteration number
-at which the current density profile ``_r`` should be appended to
-``self._r_hist``. The next checkpoint is determined by the current
-value of ``_it_counter`` and the method defined by the
-parameter ``checkp_method``. 
-
-**Parameters**
-
-checkp_method : `String` or `Int`
-    Determines how the next checkpoint is calculated. Recommended
-    value: 'dec2'. It can take the following values:
-    integer value (for equidistant checkpoints with interval of
-    the integer); 'exp#' where # is to be replaced by a float
-    value (next checkpoint is last checkp to the power of float);
-    'dec#' where # is replaced by an integer (if e.g. #==3, the
-    checkpoints goes like this: 30, 60, 90, 100, 300, 600, 900,
-    1000, 3000, ...).
-
-**Returns**
-
-checkp : `Int`
-    The calculated next checkpoint
-
-
-``create_init_profile(self, dens=None, shape=None)``
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-Creates an initial density profile for each species the
-picard iteration can start with. A list of average density of
-each species is handed over via the ``dens``-parameter.
-Additionally a nucleus can be placed in the density profile of
-each species, the shape of which determined by the
-``shape``-parameter. Calls the function ``self.set_r`` to set
-the density profile to the variable ``_r``. The Nucleus further
-satisfies the boundary condition ``_bound_cond``
-
-**Parameters**
-
-dens : `List`
-    Determines the average density of each species.
-shape : `List` of `Tuples`
-    The tuples determines the shape of the nucleus for each
-    species. E.g. (3, 4) for a 2d-system with a nucleus of
-    expand 3x4.
-
-``return_hom_densProfile(self, dens)``
-''''''''''''''''''''''''''''''''''''''
-Returns a homogeneous one species density profile with
-density according to the parameter ``dens``. The shape of which
-is determined by the `_size`-instance variable.
-
-**Parameters**
-
-dens : `Float`
-    Density of the homogeneous profile.
-
-**Returns**
-
-Profile : `np.array`
-    The resulting density profile.
-
-``return_nuc_densProfile(self, dens, shape)``
-'''''''''''''''''''''''''''''''''''''''''''''
-Returns a one species density profile with average density
-according to the ``dens``-parameter and a nucleus of shape
-determined by the ``shape``-parameter. The nucleus further
-satisfies the boundary condition ``_bound_cond``.
-
-**Parameters**
-
-dens : `Float`
-    Average density of the profile.
-shape : `Tuple`
-    Determines the shape of the nucleus. E.g. (3, 4) for a
-    2d-system with a nucleus of expand 3x4.
-
-**Returns**
-
-Profile :`np.array`
-    The density resulting profile.
-
-``set_r(self, r)``
-''''''''''''''''''
-This function is used for assigning a new initial profile
-``r`` to the instance variable ``_r``. Therefor the
-``_it_counter`` is being reset to '0' and the history
-attributes ``_r_hist``, ``_it_hist``, ``_err_hist`` are updated.
-
-**Parameters**
-
-r : `List` of `numpy.array`
-    New initial density profile for each species.
-
-``set_hist(self, r_hist, it_hist, err_hist)``
-'''''''''''''''''''''''''''''''''''''''''''''
-This function is to manually set the internal history
-variables ``_r_hist``, ``_it_hist`` and ``_err_hist``. The last
-entry of the ``r_hist``-parameter is assigned to the instance
-variable ``_r``, which is the current density profile.
-
-**Parameters**
-
-r_hist : `list` of `list` of `numpy.ndarray`
-    Iteration history of the density profile. This parameter
-    should be of the following format [profile_0, profile_1,...]
-    where ``profile_i`` is the profile of the i'th iteration
-    step and has the format [r_1, r_2, ...], where the entries
-    are the profile of the corresponding species.
-it_hist : `list` of `int`
-    This parameter lists the corresponding iteration steps of
-    the ``r_hist`` parameter.
-err_hist : `list` of `list` of `float`
-    History of the picard error. It is of the following format:
-    [err_0, err_1,...] where err_i is the error of the i'th
-    iteration step and is a list itself, with an error entry for
-    every species.
-
-``_append_hist(self)``
-''''''''''''''''''''''
-Updates the history variables ``_r_hist``,``_it_hist``, by
-appending the current density profile ``_r`` to ``_r_hist``
-and appending ``_it_counter`` to ``_it_hist``.
-
-``save_syst(self, path, filename)``
-'''''''''''''''''''''''''''''''''''
-Uses ``pickle.dump`` to save the instance variables of a
-system.
-
-**Parameters**
-
-path : `String`
-    Directory in which the system should be stored (needs to be
-    a absolute path)
-filename : `String`
-    The filename under which the system should be stored.
-
-*classmethod* ``load_syst(cls, path, filename)``
-''''''''''''''''''''''''''''''''''''''''''''''''
-Uses ``pickle.load`` to load a system. It is strongly
-recommended to override this method in the inherited classes,
-as the returned system might be of an outdated type! A typecast
-should be implemented!
-
-**Parameters**
-
-path : `String`
-    Directory in which the system is stored which one want's to
-    load (needs to be a absolute path)
-filename: `String`
-    The filename under which the system of interest is stored.
-
-**Returns**
-
-Model : `LdftModel`
-    The returned model probably has the type of an inherited
-    class. It might also be the class of an outdated type.
-
-
-``print_error(self)``
-'''''''''''''''''''''
-Returns a figure where the error history ``_err_hist`` is
-plotted.
-
-**Returns**
-
-Figure : `matplotlib.pyplot.figure`
-    Plotted error history.
-
-``print_2d_profile(self)``
-''''''''''''''''''''''''''
-Creates a figure where the current profile is plotted. This
-function is just for 2d-systems.
-
-**Returns**
-
-Figure : `matplotlib.pyplot.figure`
-    Plotted profile
-
-``print_2d_profile2(self)``
-'''''''''''''''''''''''''''
-Creates a figure where the current profile is plotted. This
-function is just for 2d-systems.
-
-**Returns**
-
-Figure : `matplotlib.pyplot.figure`
-    Plotted profile
-
-``print_2d_hist(self, species=0, rows=10, idx_list=None)``
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Creates a figure where the history ``_r_hist`` is plotted.
-Just one species can be plotted at the same time. Not the total
-history is plotted but certain iteration steps.
-
-**Parameters**
-
-species : `int`; optional: default = 0
-    The species, the iteration-history of which shall be
-    plotted.
-rows : `int`; optional: default = 10
-    Number of iteration-steps which shall be plotted. This
-    parameter is just be considered when the parameter
-    ``idx_list`` is `None`.
-idx_list : `List`; optional: default = None
-    If `None`, the iteration steps which are plotted are chosen
-    equidistant in the ``_it_hist``-list. Alternatively one can
-    choose ones own list. This list, however, does not contain
-    the iteration-steps which shall be plotted, but the indices
-    of those.
-
-**Returns**
-
-Figure : `matplotlib.pyplot.figure`
-    Plotted history
-
-``print_2d_hist2(self, species=0, rows=10, idx_list=None)``
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Creates a figure where the history ``_r_hist`` is plotted.
-Just one species can be plotted at the same time. Not the total
-history is plotted but certain iteration steps.
-
-**Parameters**
-
-species : `int`; optional: default = 0
-    The species, the iteration-history of which shall be
-    plotted.
-rows : `int`; optional: default = 10
-    Number of iteration-steps which shall be plotted. This
-    parameter is just be considered when the parameter
-    ``idx_list`` is `None`.
-idx_list : `List`; optional: default = None
-    If `None`, the iteration steps which are plotted are chosen
-    equidistant in the ``_it_hist``-list. Alternatively one can
-    choose ones own list. This list, however, does not contain
-    the iteration-steps which shall be plotted, but the indices
-    of those.
-
-**Returns**
-
-Figure : `matplotlib.pyplot.figure`
-    Plotted history
-
-
-
-
-``cal_p_vap(self)``
-'''''''''''''''''''
-Calculates the coexisting pressures under the current
-parameters of the system (``_mu``, ``_dens``) and returns the
-vapour pressure.
-
-**Returns**
-
-Vapour pressure : `Float`
-    The vapour pressure of the current system
-
-``cal_p_liq(self)``
-'''''''''''''''''''
-Calculates the coexisting pressures under the current
-parameters of the system (``_mu``, ``_dens``) and returns the
-liquid pressure.
-
-**Returns**
-
-Liquid pressure : `Float`
-    The vapour pressure of the current system
-
-``det_intface_shape(self)``
-'''''''''''''''''''''''''''
-Determines the shape of the interface of the current
-configuration. It requires the inhomogeneities to be centered in
-the system.
-
-**Returns**
-
-Shape : `String`
-    The shape of the interface: 'Droplet', 'Cylinder', 'Slab',
-    'Homogeneous'
-
-``cal_del_Om(self)``
-''''''''''''''''''''
-Calculates the delta between the current grand potential and
-the one by a homogeneous system of (oversaturated) vapor with the
-same chemical potential as the current system.
-
-**Returns**
-
-delta Omega : `Float`
-    Delta of the grand potential
-
-``cal_R_s(self)``
-'''''''''''''''''
-Calculates the radius of surface of tension. In case of a
-Cylinder configuration in three dimensions, the cylinder has to
-point in the 0th axis of the density profile ``self._r``.
-
-**Returns**
-
-Radius of s.o.t. : `Float`
-    Radius of surface of tension
-
-``cal_R_em(self, em_species=0)``
-''''''''''''''''''''''''''''''''
-Calculates the equimolar radius for the species given by
-``em_species``. In case of cylinder configurations in three
-dimensions the cylinder has to point in the 0th axis of the
-density profile ``self._r``. This function does only work
-properly, if a droplet/cylinder is embedded in a supersaturated
-vapour. For configurations of bubbles or vapour cylinders
-embedded in liquid, the result will be wrong.
-
-**Parameters**
-
-em_species : `Int`; Optional: default=0
-    Decides for which species the equimolar radius should
-    be calculated
-
-**Returns**
-
-equimolar radius : `Float`
-    Radius or the equimolar surface of a specific species.
-
-``cal_gamma_R(self, R)``
-''''''''''''''''''''''''
-Calculates the surface tension for spheres/circles in 3d/2d of
-radius ``R``. In case of cylinder configurations in three
-dimensions the cylinder has to point in the 0th axis of the
-density profile ``self._r``.
-
-**Parameters**
-
-R : `Float`
-    Radius at which the surface tension should be calculated
-
-**Returns**
-
-surface tension : `Float`
-    surface tension for radius R.
-
-``cal_gamma_s(self)``
-'''''''''''''''''''''
-Calculates the surface tension for spheres/circles in 3d/2d at
-the surface of tensions. In case of cylinder configurations in
-three dimensions the cylinder has to point in the 0th axis of the
-density profile ``self._r``.
-
-**Returns**
-
-surface tension : `Float`
-    surface tension at the surface of tension.
-
-``cal_gamma_em(self, species=0)``
-'''''''''''''''''''''''''''''''''
-Calculates the surface tension for spheres/circles in 3d/2d at
-the equimolar surface of a given species. In case of cylinder
-configurations in three dimensions the cylinder has to point in
-the 0th axis of the density profile ``self._r``. This function
-does only work properly, if a droplet/cylinder is embedded in a
-supersaturated vapour. For configurations of bubbles or vapour
-cylinders embedded in liquid, the result will be wrong.
-
-**Parameters**
-
-species : `Int`; Optional: default=0
-    species for the equimolar surface
-
-**Returns**
-
-Surface tension : `Float`
-    Surface tension at the equimolar surface.
-
-``cal_adsorptionAtSurfOfTens(self, species=0)``
-'''''''''''''''''''''''''''''''''''''''''''''''
-Calculates the adsorption for spheres/circles in 3d/2d at the
-surface of tension for a given species. This function
-does only work properly, if a droplet/cylinder is embedded in a
-supersaturated vapour. For configurations of bubbles or vapour
-cylinders embedded in liquid, the result will be wrong.
-
-**Parameters**
-
-species : `Int`; Optional: default =0
-    Species for which the adsorption should be calculated
-
-**Returns**
-
-Adsorption : `Tuple` of `Float`
-    First entry: Adsorbed particle number; Second entry:
-    adsorption.
-
-``cal_gamma_inf(self, area)``
-'''''''''''''''''''''''''''''
-Calculates the surface tension of a flat interface. This
-function can not determine the area of the surface itself.
-Therefore it has to be passed as parameter.
-
-**Parameters**
-
-area : `float`
-    Area of the surface. There are always two surfaces
-    separating the liquid and the vapour. Meant is the area of
-    one of those
-
-**returns:**
-    ``Tuple`` of ``Float``: First entry: Adsorbed particle
-    number; Second entry: Adsorption.
