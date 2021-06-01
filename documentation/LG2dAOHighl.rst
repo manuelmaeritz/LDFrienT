@@ -1398,6 +1398,15 @@ Help-methods for the picard iteration
 Help-functions for the interface properties
 '''''''''''''''''''''''''''''''''''''''''''
 
+*class* ``_CorrectIftAtPaddedBoundary()``
+    This is a decorator class. In order to fulfill the Gibbs-Adsorption
+    equation, additional terms need to be added to the definition of the
+    surface tension, at the Highlander functional. This decorator takes
+    care of them. Please decorate the functions, which calculate the
+    surface tension with it.
+
+----
+
 ``_cal_p(self, dens)``
 
     Calculates the pressure for a bulk system with given densities

@@ -83,22 +83,23 @@ it_hist : `List`; Optional: default = `None`
     the ``r_hist``-parameter. Use `None` if no history available.
     Note: if ``r_hist`` is given then also this argument should be
     assigned with an appropriate list.
-bound_cond : `String`; Optional: default value 'periodic'
-    Determines the boundary condition (bc). Values available:
-    'periodic' for periodic bc, '11_if' for 2d systems with 45°
-    tilted bc (to create 45° slab interfaces (11-interfaces)),
-    '110_if' for 3d systems with a 45° tilted bc with respect to one
-    axis (for 110-interfaces), '111_if' for 3d systems with a 45°
-    tilted bc with respect to two axis (for 111-interfaces). For
-    '11_if', '110_if' and '111_if' the ``size``-argument should be
-    chosen in that way, the first two axis are of equal length and
-    one and the last one is of twice that length (cuboid with square
-    front face and long edge twice the short edges). If one wants to
-    make use of the ``bound_cond``-argument one needs to use the
-    ``_boundary_roll``-method for rolling the density profile
-    instead of numpy.roll in the class implementing the specific
-    model. The variable can be easily extended to further accepted
-    values by adapting the ``self._boundary_roll``-method.
+bound_cond : `String`; Optional: default value 'periodic' Determines the
+    boundary condition (bc). Values available: 'periodic' for periodic bc,
+    '11_if' for 2d systems with 45° tilted bc (to create 45° slab
+    interfaces (11-interfaces)), '110_if' for 3d systems with a 45° tilted
+    bc with respect to one axis (for 110-interfaces), '111_if' for 3d
+    systems with a 45° tilted bc with respect to two axis (for
+    111-interfaces), 'pad' for a system, which is connected to a reservoir
+    in the first dimension (0'th axis) and periodic in all other
+    dimensions. For '11_if', '110_if' and '111_if' the ``size``-argument
+    should be chosen in that way, the first two axis are of equal length
+    and one and the last one is of twice that length (cuboid with square
+    front face and long edge twice the short edges). If one wants to make
+    use of the ``bound_cond``-argument one needs to use the
+    ``_boundary_roll``-method for rolling the density profile instead of
+    numpy.roll in the class implementing the specific model. The variable
+    can be easily extended to further accepted values by adapting the
+    ``self._boundary_roll``-method.
     
 Attributes
 ----------
@@ -216,7 +217,7 @@ dim : `int`, read-only
     Accesses the ``_dim``-attribute
 
 Methods
---------
+-------
 
 ``__init__(self, size, mu_fix, mu=None, dens=None, v_ext=None, r=None, r_hist=None, err_hist=None, it_hist=None, bound_cond='periodic')``
 
@@ -394,6 +395,25 @@ Methods for creating the initial density profile
         The tuples determines the shape of the nucleus for each
         species. E.g. (3, 4) for a 2d-system with a nucleus of
         expand 3x4.
+        
+----
+
+``create_init_100_if(self)``
+
+    Creates an initial density profile with an [100]-interface. Half of
+    the profile is filled by the coexisting vapor density value and the
+    other half by the coexisting liquid density value. The interface
+    between both sides is hard. The resulting profile is assigned to the
+    `_r`-variable of the calling instance by applying the `set_r` method.
+
+----
+
+``create_init_wedge_if(self)``
+
+    Creates an initial density profile. The profile continuously fades
+    from one coexisting density to the other (the density thus resembles a
+    wedge). The resulting profile is assigned to the `_r`-variable of the
+    calling instance by applying the `set_r` method.
         
 ----
 
@@ -702,15 +722,18 @@ Methods calculating interface properties
 
 ``cal_gamma_R(self, R)``
 
-    Calculates the surface tension for spheres/circles in 3d/2d of
-    radius ``R``. In case of cylinder configurations in three
-    dimensions the cylinder has to point in the 0th axis of the
-    density profile ``self._r``.
+    Calculates the surface tension at the position ``R`` of the
+    interface. For droplets and cylinders ``R`` is the radius, for slabs
+    ``R`` corresponds width of the liquid portion. In case of cylinder
+    configurations in three dimensions the cylinder has to point in the 0th
+    axis of the density profile ``self._r``. In case of slab interfaces the
+    function assumes a single interface (and not two interfaces separating
+    liquid-vapor-liquid). 
 
     **Parameters**
 
     R : `Float`
-        Radius at which the surface tension should be calculated
+        Position at which the surface tension should be calculated
 
     **Returns**
 
@@ -800,6 +823,26 @@ This methods are private and not supposed to be called from external. They are h
 Help-methods for calculating the functional
 '''''''''''''''''''''''''''''''''''''''''''
 
+*class* ``_RespectBoundaryCondition()``
+
+    Decorator class: If this Decorator is applied to an instance method,
+    it checks the `_bound_cond`-attribut of the calling instance. In case
+    that `_bound_cond` is 'pad', it pads the density profile `self._r` with
+    the coexisting vapor and liquid values respectively to the right and
+    left of the first dimension (0'th axis) by one lattice site for each
+    apparent species. This decorator needs to be applied on instance
+    methods which makes calculations on the density profile by rolling the
+    weighted densities. (The only case known to me where this is required
+    is for calculating the excess chemical potential or similar values.)
+    For calculation where only the rolling of the density profile itself is
+    required the function need not to be decorated by this decorator, since
+    the padding is captured by the function `_boundary_roll` then.  However,
+    when the weighted densities need to be rolled, `_boundary_roll` does
+    not know with which value it needs to pad.  After that calculation the
+    density profile is again trimmed to the original size.
+    
+----
+
 *classmethod* ``_tilted_roll_3d(cls, array, steps, roll_axis, shift, shift_axis)``
 
     Rolls a 3d numpy array in the manner of numpy.roll in
@@ -855,16 +898,42 @@ Help-methods for calculating the functional
     **Returns**
 
     The rolled array : `numpy.array`
-    
+   
+----
+
+*classmethod* ``_pad_roll(cls, array, steps, axis)``
+
+    Pads the array with one side of the array and trims it on the other
+    side by the same amount of lattice sites, such that the shape of the
+    array remains the same. The padding happens with the edge values of the
+    array.
+
+    **Parameters**
+
+    array : `numpy.array`
+        The array which shall be padded
+    steps : `int`
+        Number of values padded to the edge of the axis. Positive values
+        pad on the lower side of the array, negative on the upper side.
+    axis : `int`
+        The axis of the array which shall be padded.
+
+    **Returns**
+
+    pad : `np.array`
+        The padded array
+
 ----
 
 ``_boundary_roll(self, r, steps, axis=0)``
 
-    Performs the rolling of a density profile under consideration
-    of the boundary condition in the class variable ``_bound_cond``.
-    If the boundary condition is not 'periodic', then the function
-    ``_tilted_roll`` is applied in an appropriate way to satisfy the
-    given boundary condition while rolling.
+    Performs the rolling of a density profile under consideration of the
+    boundary condition in the class variable ``_bound_cond``.  If the
+    boundary condition is 'periodic', then an ordinary `numpy.roll` is
+    performed. In case of '11_if', '110_if' or '111_if' boundary conditions
+    the function ``_tilted_roll`` is applied in an appropriate way to
+    satisfy the given boundary condition while rolling. For the 'pad'
+    boundary condition, the ``_pad_roll`` function is used.
 
     **Parameters**
 

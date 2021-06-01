@@ -235,6 +235,7 @@ class LG2dMf(LdftModel):
         F = self.cal_F_id()+self.cal_F_hr()+self.cal_F_sa()
         return F
 
+    @LdftModel._RespectBoundaryCondition()
     def cal_mu_ex(self):
         r = self._r[0]
         epsi = self._epsi
@@ -364,7 +365,7 @@ class LG2dMf(LdftModel):
         epsi = args[0]
         mu = args[1]
         mu_rho = cls.cal_bulk_mu(rho, epsi)
-        return mu_rho-mu
+        return (mu_rho-mu)**2
     
     @classmethod
     def cal_bulk_coex_dens(cls, mu, epsi):

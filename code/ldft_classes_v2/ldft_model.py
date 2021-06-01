@@ -63,22 +63,23 @@ class LdftModel(abc.ABC):
         the ``r_hist``-parameter. Use `None` if no history available.
         Note: if ``r_hist`` is given then also this argument should be
         assigned with an appropriate list.
-    bound_cond : `String`; Optional: default value 'periodic'
-        Determines the boundary condition (bc). Values available:
-        'periodic' for periodic bc, '11_if' for 2d systems with 45°
-        tilted bc (to create 45° slab interfaces (11-interfaces)),
-        '110_if' for 3d systems with a 45° tilted bc with respect to one
-        axis (for 110-interfaces), '111_if' for 3d systems with a 45°
-        tilted bc with respect to two axis (for 111-interfaces). For
-        '11_if', '110_if' and '111_if' the ``size``-argument should be
-        chosen in that way, the first two axis are of equal length and
-        one and the last one is of twice that length (cuboid with square
-        front face and long edge twice the short edges). If one wants to
-        make use of the ``bound_cond``-argument one needs to use the
-        ``_boundary_roll``-method for rolling the density profile
-        instead of numpy.roll in the class implementing the specific
-        model. The variable can be easily extended to further accepted
-        values by adapting the ``self._boundary_roll``-method.
+    bound_cond : `String`; Optional: default value 'periodic' Determines the
+        boundary condition (bc). Values available: 'periodic' for periodic bc,
+        '11_if' for 2d systems with 45° tilted bc (to create 45° slab
+        interfaces (11-interfaces)), '110_if' for 3d systems with a 45° tilted
+        bc with respect to one axis (for 110-interfaces), '111_if' for 3d
+        systems with a 45° tilted bc with respect to two axis (for
+        111-interfaces), 'pad' for a system, which is connected to a reservoir
+        in the first dimension (0'th axis) and periodic in all other
+        dimensions. For '11_if', '110_if' and '111_if' the ``size``-argument
+        should be chosen in that way, the first two axis are of equal length
+        and one and the last one is of twice that length (cuboid with square
+        front face and long edge twice the short edges). If one wants to make
+        use of the ``bound_cond``-argument one needs to use the
+        ``_boundary_roll``-method for rolling the density profile instead of
+        numpy.roll in the class implementing the specific model. The variable
+        can be easily extended to further accepted values by adapting the
+        ``self._boundary_roll``-method.
    """
 
     _size = None
@@ -148,7 +149,7 @@ class LdftModel(abc.ABC):
     """
 
     _bound_cond = None
-    """Here the ``bound_condition``-parameter is stored. See its
+    """Here the ``bound_cond``-parameter is stored. See its
     description for further information. (`String`)
     """
 
@@ -311,6 +312,7 @@ class LdftModel(abc.ABC):
     #It follows the functionals defining the model.
     ####################################################################
 
+
     @abc.abstractmethod
     def cal_F(self):
         """Calculates the free energy of the models current density
@@ -334,7 +336,7 @@ class LdftModel(abc.ABC):
         """
         Om = self.cal_F()
         for i in range(len(self._mu_fix)):
-            Om -= self._mu[i]*np.sum(self._r[i])
+            Om += np.sum((self._v_ext[i]-self._mu[i])*self._r[i])
         return Om
 
     def cal_semi_Om(self):
@@ -348,7 +350,7 @@ class LdftModel(abc.ABC):
         """
         semi_Om = self.cal_F()
         for i in range(len(self._mu_fix)):
-            semi_Om -= self._mu[i]*np.sum(self._r[i])\
+            semi_Om += np.sum((self._v_ext[i]-self._mu[i])*self._r[i])\
                     if self._mu_fix[i] else 0
         return semi_Om
 
@@ -367,6 +369,53 @@ class LdftModel(abc.ABC):
     #It follows help-functions for implementing the model specific
     #functionals
     ####################################################################
+
+    class _RespectBoundaryCondition():
+        """Decorator class: If this Decorator is applied to an instance method,
+        it checks the `_bound_cond`-attribut of the calling instance. In case
+        that `_bound_cond` is 'pad', it pads the density profile `self._r` with
+        the coexisting vapor and liquid values respectively to the right and
+        left of the first dimension (0'th axis) by one lattice site for each
+        apparent species. This decorator needs to be applied on instance
+        methods which makes calculations on the density profile by rolling the
+        weighted densities. (The only case known to me where this is required
+        is for calculating the excess chemical potential or similar values.)
+        For calculation where only the rolling of the density profile itself is
+        required the function need not to be decorated by this decorator, since
+        the padding is captured by the function `_boundary_roll` then.  However,
+        when the weighted densities need to be rolled, `_boundary_roll` does
+        not know with which value it needs to pad.  After that calculation the
+        density profile is again trimmed to the original size.
+        """
+
+        def __init__(self):
+            pass
+
+        def __call__(self, func):
+            def funcWraper(self):
+                if self._bound_cond == 'pad':
+                    r_coex = self._cal_coex_dens()
+                    for i,r in enumerate(self._r):
+                        dens_vap = r_coex[i][0]
+                        dens_liq = r_coex[i][1]
+                        pad_width = tuple([(1,1) if ax==0 else (0,0) for ax in
+                                           range(self._dim)])
+                        cons_val = tuple([(dens_liq, dens_vap) for ax in
+                                          range(self._dim)])
+                        self._r[i] = np.pad(r, pad_width, constant_values=cons_val)
+                    #print(self._r)
+                    res = func(self)
+                    #print(res)
+                    res = [np.take(res_i, indices=range(1,len(res_i)-1), axis=0) for
+                           res_i in res]
+                    for i,r in enumerate(self._r):
+                        self._r[i] = np.take(r, indices=range(1,len(r)-1), axis=0)
+                    #print(self._r)
+                    return res
+                else:
+                    #print('Hallo')
+                    return func(self)
+            return funcWraper
 
     @classmethod
     def _tilted_roll_3d(cls, array, steps, roll_axis, shift, shift_axis):
@@ -434,7 +483,7 @@ class LdftModel(abc.ABC):
         Parameters
         ----------
         array : `numpy.array`
-        A 2d or 3d array which should be rolled.
+             A 2d or 3d array which should be rolled.
         steps : `int`
             Number of steps of rolling. Negative numbers for rolling in
             negative direction.
@@ -460,12 +509,45 @@ class LdftModel(abc.ABC):
             return cls._tilted_roll_3d(array, steps, roll_axis, shift,
                     shift_axis)
 
+    @classmethod
+    def _pad_roll(cls, array, steps, axis):
+        """Pads the array with one side of the array and trims it on the other
+        side by the same amount of lattice sites, such that the shape of the
+        array remains the same. The padding happens with the edge values of the
+        array.
+
+        Parameters
+        ----------
+        array : `numpy.array`
+            The array which shall be padded
+        steps : `int`
+            Number of values padded to the edge of the axis. Positive values
+            pad on the lower side of the array, negative on the upper side.
+        axis : `int`
+            The axis of the array which shall be padded.
+
+        Returns
+        -------
+        pad : `np.array`
+            The padded array
+        """
+        pad_width_ax = (steps,0) if steps>0 else (0,-steps)
+        pad_width = tuple([pad_width_ax if i==axis else (0,0) for i in
+                           range(len(np.shape(array)))])
+        array = np.pad(array, pad_width, mode='edge')
+        ind=range(0,np.shape(array)[axis]-steps) if steps>0 else \
+                range(-steps,np.shape(array)[axis])
+        array = array.take(indices=ind, axis=axis)
+        return array
+
     def _boundary_roll(self, r, steps, axis=0):
-        """Performs the rolling of a density profile under consideration
-        of the boundary condition in the class variable ``_bound_cond``.
-        If the boundary condition is not 'periodic', then the function
-        ``_tilted_roll`` is applied in an appropriate way to satisfy the
-        given boundary condition while rolling.
+        """Performs the rolling of a density profile under consideration of the
+        boundary condition in the class variable ``_bound_cond``.  If the
+        boundary condition is 'periodic', then an ordinary `numpy.roll` is
+        performed. In case of '11_if', '110_if' or '111_if' boundary conditions
+        the function ``_tilted_roll`` is applied in an appropriate way to
+        satisfy the given boundary condition while rolling. For the 'pad'
+        boundary condition, the ``_pad_roll`` function is used.
 
         Parameters
         ----------
@@ -501,6 +583,11 @@ class LdftModel(abc.ABC):
                 shift = max(self._size)//2
                 return self._tilted_roll(r, steps, axis, shift,
                         shift_axis)
+        elif self._bound_cond == 'pad':
+            if axis==0:
+                return self._pad_roll(r, steps, axis)
+            else:
+                return np.roll(r, steps, axis)
 
     def _cal_Phi_id(self):
         """Calculates the ideal gas part of the free energy density.
@@ -710,6 +797,46 @@ class LdftModel(abc.ABC):
     ####################################################################
     #It follow functions for constructing initial density profiles
     ####################################################################
+    
+    def create_init_100_if(self):
+        """Creates an initial density profile with an [100]-interface. Half of
+        the profile is filled by the coexisting vapor density value and the
+        other half by the coexisting liquid density value. The interface
+        between both sides is hard. The resulting profile is assigned to the
+        `_r`-variable of the calling instance by applying the `set_r` method.
+        """
+        coex_dens = self._cal_coex_dens()
+        r=[]
+        #if not np.all(self._mu_fix):
+        #    idx = self._mu_fix.index(False)
+        #    rl = coex_dens[idx][1]
+        #    rv = coex_dens[idx][0]
+        #    dens = self._dens[idx]
+        #    R = int(round((dens-rv)*self._size[0]/(rl-rv), 0))
+        #else:
+        R = self._size[0]//2 # Beim auskommentieren einrutschen
+        for coex_i in coex_dens:
+            r_i = np.full(self._size, coex_i[0])
+            r_i[0:R] = coex_i[1]
+            r.append(r_i)
+        self.set_r(r)
+
+    def create_init_wedge_if(self):
+        """Creates an initial density profile. The profile continuously fades
+        from one coexisting density to the other (the density thus resembles a
+        wedge). The resulting profile is assigned to the `_r`-variable of the
+        calling instance by applying the `set_r` method.
+        """
+        coex_dens = self._cal_coex_dens()
+        r = []
+        for coex_i in coex_dens:
+            startShape = self._size[1:]
+            start = np.full(startShape, coex_i[0])
+            stop = np.full(startShape, coex_i[1])
+            r_i = np.linspace(start, stop, self._size[0], axis=0)
+            r.append(r_i)
+        r[1]=r[2]=np.full(self._size, 0)
+        self.set_r(r)
 
     def create_init_profile(self, dens=None, shape=None):
         """Creates an initial density profile for each species the
@@ -1241,12 +1368,14 @@ class LdftModel(abc.ABC):
 
     def cal_R_em(self, em_species=0):
         """Calculates the equimolar radius for the species given by
-        ``em_species``. In case of cylinder configurations in three
-        dimensions the cylinder has to point in the 0th axis of the
-        density profile ``self._r``. This function does only work
-        properly, if a droplet/cylinder is embedded in a supersaturated
-        vapour. For configurations of bubbles or vapour cylinders
-        embedded in liquid, the result will be wrong.
+        ``em_species``. In case of slab configurations, the function can detect
+        the orientation of the interface itself. This is not the case for
+        cylinder configurations in three dimensions. Here, the cylinder has to
+        point in the 0th axis of the density profile ``self._r``. Moreover, for
+        droplet/cylinder configurations, this function only work properly, if a
+        droplet/cylinder is embedded in a supersaturated vapour. For
+        configurations of bubbles or vapour cylinders embedded in liquid, the
+        result will be wrong.
 
         Parameters
         ----------
@@ -1272,18 +1401,38 @@ class LdftModel(abc.ABC):
         elif self._dim == 3 and ifShape=='Cylinder':
             h = self._size[0]
             R_em = np.sqrt(x*V/np.pi/h)
+        elif self._dim == 2 and ifShape=='Slab':
+            devX = np.mean(self._r[0][0,:])-self._r[0][0,0]
+            devY = np.mean(self._r[0][:,0])-self._r[0][0,0]
+            dev = np.abs(np.array([devX, devY]))
+            plane_basis = np.where(dev>10**-6, 1, 0)
+            plane = self._size*plane_basis
+            A = reduce(lambda a, b: a*b, np.where(plane==0,1,plane))
+            R_em = V*x/A
+        elif self._dim == 3 and ifShape=='Slab':
+            devX = np.mean(self._r[0][0,:,:])-self._r[0][0,0,0]
+            devY = np.mean(self._r[0][:,0,:])-self._r[0][0,0,0]
+            devZ = np.mean(self._r[0][:,:,0])-self._r[0][0,0,0]
+            dev = np.abs(np.array([devX, devY, devZ]))
+            plane_basis = np.where(dev>10**-6, 1, 0)
+            plane = self._size*plane_basis
+            A = reduce(lambda a, b: a*b, np.where(plane==0,1,plane))
+            R_em = V*x/A
         return R_em
 
     def cal_gamma_R(self, R):
-        """Calculates the surface tension for spheres/circles in 3d/2d of
-        radius ``R``. In case of cylinder configurations in three
-        dimensions the cylinder has to point in the 0th axis of the
-        density profile ``self._r``.
+        """Calculates the surface tension at the position ``R`` of the
+        interface. For droplets and cylinders ``R`` is the radius, for slabs
+        ``R`` corresponds width of the liquid portion. In case of cylinder
+        configurations in three dimensions the cylinder has to point in the 0th
+        axis of the density profile ``self._r``. In case of slab interfaces the
+        function assumes a single interface (and not two interfaces separating
+        liquid-vapor-liquid). 
 
         Parameters
         ----------
         R : `Float`
-            Radius at which the surface tension should be calculated
+            Position at which the surface tension should be calculated
         
         Returns
         -------
@@ -1303,6 +1452,23 @@ class LdftModel(abc.ABC):
             h = self._size[0]
             A = 2*np.pi*R*h
             V = np.pi*R**2*h
+        elif self._dim == 2 and ifShape=='Slab':
+            devX = np.mean(self._r[0][0,:])-self._r[0][0,0]
+            devY = np.mean(self._r[0][:,0])-self._r[0][0,0]
+            dev = np.abs(np.array([devX, devY]))
+            plane_basis = np.where(dev>10**-6, 1, 0)
+            plane = self._size*plane_basis
+            A = reduce(lambda a, b: a*b, np.where(plane==0,1,plane))
+            V=R*A
+        elif self._dim == 3 and ifShape=='Slab':
+            devX = np.mean(self._r[0][0,:,:])-self._r[0][0,0,0]
+            devY = np.mean(self._r[0][:,0,:])-self._r[0][0,0,0]
+            devZ = np.mean(self._r[0][:,:,0])-self._r[0][0,0,0]
+            dev = np.abs(np.array([devX, devY, devZ]))
+            plane_basis = np.where(dev>10**-6, 1, 0)
+            plane = self._size*plane_basis
+            A = reduce(lambda a, b: a*b, np.where(plane==0,1,plane))
+            V=R*A
         gamma = del_Om/A+del_p*V/A
         return gamma
 

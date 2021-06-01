@@ -532,6 +532,7 @@ class LG3dAOHighl(LdftModel):
                 +mu_pc3*np.sum(r_pc3))
         return F_lg
 
+    @LdftModel._RespectBoundaryCondition()
     def cal_mu_ex(self):
         n = self._cal_n()
         n1=n[0]
@@ -835,14 +836,61 @@ class LG3dAOHighl(LdftModel):
     def _cal_coex_dens(self):
         mu = self._mu[0]
         epsi = self.epsi
-        rho_min = np.min(self._r[0])
-        rho_max = np.max(self._r[0])
-        initGuess = np.array([rho_min/2, (1+rho_max)/2])
-        r_c_coex = self.cal_bulk_coex_dens(mu, epsi,
+        if self._r:
+            init_min = np.min(self._r[0])
+            init_max = np.max(self._r[0])
+            initGuess = np.array([init_min/2, (1+init_max)/2])
+            r_c_coex = self.cal_bulk_coex_dens(mu, epsi,
                 initGuess=initGuess)
+        else:
+            r_c_coex = self.cal_bulk_coex_dens(mu, epsi)
         r_pc_coex = self._cal_bulk_r_pc(np.array(r_c_coex), epsi)
         r_pc_coex = tuple(r_pc_coex)
-        return [r_c_coex, r_pc_coex, r_pc_coex]
+        return [r_c_coex, r_pc_coex, r_pc_coex, r_pc_coex]
 
+    class _CorrectIftAtPaddedBoundary():
+        """This is a decorator class. In order to fulfill the Gibbs-Adsorption
+        equation, additional terms need to be added to the definition of the
+        surface tension, at the Highlander functional. This decorator takes
+        care of them. Please decorate the functions, which calculate the
+        surface tension with it.
+        """
+        def __init__(self):
+            pass
+
+        def __call__(self, func):
+            def funcWraper(self, arg=None):
+                if self._bound_cond == 'pad':
+                    Phi_id = lambda r: r*(np.log(r)-1)
+                    Phi_0 = self._cal_Phi_0
+                    cal_x1= lambda rc, rpc, mupc: 0.5*Phi_id(rpc)+Phi_0(rpc+rc)-\
+                            0.5*Phi_0(rpc)-0.5*mupc*rpc-np.log(np.exp(mupc)+1)*rc
+                    coex_dens=self._cal_coex_dens()
+                    rcv = coex_dens[0][0]
+                    rcl = coex_dens[0][1]
+                    rpcv = coex_dens[1][0]
+                    rpcl = coex_dens[1][1]
+                    mupc = self._mu_pc1
+                    x0 = -cal_x1(rcv, rpcv, mupc)
+                    x1 = cal_x1(rcl, rpcl, mupc)
+                    x = x0+x1
+                    #print('pad x='+str(x))
+                else:
+                    x=0
+                    #print(kwargs)
+                return func(self, arg)+x
+            return funcWraper
+
+    @_CorrectIftAtPaddedBoundary()
+    def cal_gamma_inf(self, area):
+        return super().cal_gamma_inf(area)
+
+    @_CorrectIftAtPaddedBoundary()
+    def cal_gamma_R(self, R):
+        return super().cal_gamma_R(R)
+
+    @_CorrectIftAtPaddedBoundary()
+    def cal_gamma_s(self, arg):
+        return super().cal_gamma_s()
 
 

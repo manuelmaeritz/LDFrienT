@@ -237,6 +237,7 @@ class LG3dMf(LdftModel):
         F = self.cal_F_id()+self.cal_F_hr()+self.cal_F_sa()
         return F
 
+    @LdftModel._RespectBoundaryCondition()
     def cal_mu_ex(self):
         r = self._r[0]
         epsi = self._epsi
