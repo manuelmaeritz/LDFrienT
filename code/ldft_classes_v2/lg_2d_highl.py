@@ -811,7 +811,7 @@ class LG2dAOHighl(LdftModel):
             pass
 
         def __call__(self, func):
-            def funcWraper(self, **kwargs):
+            def funcWraper(self, arg=None):
                 if self._bound_cond == 'pad':
                     Phi_id = lambda r: r*(np.log(r)-1)
                     Phi_0 = self._cal_Phi_0
@@ -830,7 +830,7 @@ class LG2dAOHighl(LdftModel):
                 else:
                     x=0
                     #print('else x='+str(x))
-                return func(self, **kwargs)+x
+                return func(self, arg)+x
             return funcWraper
 
     @_CorrectIftAtPaddedBoundary()
